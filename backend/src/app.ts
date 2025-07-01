@@ -1,10 +1,17 @@
-import express from 'express';
+import express from "express";
+import authRoute from "./routes/auth-route";
 
 const app = express();
 
+// Middleware
 app.use(express.json());
-app.use('/api', (req, res,) => {
-  res.json({ message: 'Hello from api' });
+
+// Health check route
+app.get("/", (_req, res) => {
+  res.json({ message: "Hello" });
 });
+
+// Routes
+app.use("/api/auth", authRoute);
 
 export default app;
