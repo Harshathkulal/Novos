@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Conversation from "../models/conversation-modal";
 import Message from "../models/message-modal";
-import { getReceiverSocketId, io } from "../socket/socket";
+import { getReceiverSocketId, getIOInstance } from "../socket/socket";
 
 /**
  * Sends a message from the logged-in user to the specified receiver.
@@ -59,6 +59,7 @@ export const sendMessage = async (
     // Emit new message to receiver if connected via socket
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
+      const io = getIOInstance();
       io.to(receiverSocketId).emit("newMessage", newMessage);
     }
 

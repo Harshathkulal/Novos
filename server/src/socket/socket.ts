@@ -1,50 +1,59 @@
 import { Server, Socket } from "socket.io";
-import http from "http";
-import express from "express";
 
-const app = express();
-const server = http.createServer(app);
+let io: Server;
 
-const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:3000"],
-    methods: ["GET", "POST"],
-  },
-});
-
-// Map to track userId -> socketId for connected users
+// Map to store userId -> socketId for tracking connected users
 const userSocketMap = new Map<string, string>();
 
 /**
  * Get the socket ID for a given user ID.
+ * Used to emit events to a specific user if they're online.
+ *
  * @param receiverId - The user ID
- * @returns The socket ID or undefined if not connected
+ * @returns The socket ID or undefined if the user is not connected
  */
 export const getReceiverSocketId = (receiverId: string): string | undefined => {
   return userSocketMap.get(receiverId);
 };
 
 /**
- * Handle socket connection event
- * Maps userId to socket.id and manages online users list
+ * Returns the initialized Socket.IO instance.
+ * Throws an error if accessed before initialization.
+ *
+ * @returns The Socket.IO server instance
  */
-io.on("connection", (socket: Socket) => {
-  const userId = socket.handshake.query.userId;
+export const getIOInstance = (): Server => {
+  if (!io) throw new Error("Socket.io instance not initialized");
+  return io;
+};
 
-  if (typeof userId === "string" && userId.trim() !== "") {
-    userSocketMap.set(userId, socket.id);
-  }
+/**
+ * Initializes and sets up Socket.IO server behavior.
+ * Listens for new connections, tracks online users, and emits updates.
+ *
+ * @param ioInstance - The Socket.IO server instance passed from your main server setup
+ */
+export function setupSocket(ioInstance: Server) {
+  io = ioInstance;
 
-  // Emit current online users list to all clients
-  io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+  // When a new client connects
+  io.on("connection", (socket: Socket) => {
+    const userId = socket.handshake.query.userId;
 
-  socket.on("disconnect", () => {
-    if (typeof userId === "string") {
-      userSocketMap.delete(userId);
-      // Emit updated online users list after disconnection
-      io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+    // Store userId and associated socket.id if valid
+    if (typeof userId === "string" && userId.trim() !== "") {
+      userSocketMap.set(userId, socket.id);
     }
-  });
-});
 
-export { app, io, server };
+    // Broadcast the current online users to all clients
+    io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
+
+    // Handle user disconnection
+    socket.on("disconnect", () => {
+      if (typeof userId === "string") {
+        userSocketMap.delete(userId);
+        io.emit("getOnlineUsers", Array.from(userSocketMap.keys())); // Notify all clients
+      }
+    });
+  });
+}
