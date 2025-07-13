@@ -8,7 +8,7 @@ import { generateJWT, clearJWT } from "../utils/jwt-utils";
 
 dotenv.config();
 
-const JWT_SECRET_RESET = process.env.JWT_SECRET_RESET || "secret";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /* * Method to handle errors in the application.
  *  @param res - 500.
@@ -103,7 +103,13 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET_RESET) as { email: string };
+    if (!JWT_SECRET) {
+      res.status(500).json({ message: "JWT secret not configured" });
+      return;
+    }
+    const decoded = jwt.verify(token, JWT_SECRET) as unknown as {
+      email: string;
+    };
     const user = await User.findOne({ email: decoded.email });
 
     if (!user) {
@@ -141,4 +147,26 @@ const getUser = async (
   }
 };
 
-export { register, login, logout, resetPassword, getUser };
+const verifyToken = (req: Request, res: Response) => {
+  try {
+    const token = req.cookies.jwt;
+    if (!token) {
+      res.status(401).json({ valid: false, message: "No token provided" });
+      return;
+    }
+    if (!JWT_SECRET) {
+      res
+        .status(500)
+        .json({ valid: false, message: "JWT secret not configured" });
+      return;
+    }
+    jwt.verify(token, JWT_SECRET);
+    res.status(200).json({ valid: true, message: "Token is valid" });
+    return;
+  } catch (error) {
+    res.status(401).json({ valid: false, message: "Token invalid or expired" });
+    return;
+  }
+};
+
+export { register, login, logout, resetPassword, getUser, verifyToken };
