@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { loginUser } from "@/services/authService";
 
 export default function LoginPage() {
   const [form, setForm] = useState({
@@ -29,20 +30,7 @@ export default function LoginPage() {
     setSuccess("");
 
     try {
-      setLoading(true);
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          identifier: form.email,
-          password: form.password,
-        }),
-        credentials: "include",
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed.");
-
+      await loginUser(form.email, form.password);
       setSuccess("Login successful!");
       setForm({ email: "", password: "" });
 

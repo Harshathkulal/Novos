@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { registerUser } from "@/services/authService";
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -35,18 +36,7 @@ export default function SignupPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: form.username,
-          email: form.email,
-          password: form.password,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Registration failed.");
+      await registerUser(form.username, form.email, form.password);
 
       setSuccess("Registration successful. You can now log in.");
       setForm({ username: "", email: "", password: "", confirmPassword: "" });
