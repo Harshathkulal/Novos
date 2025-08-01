@@ -3,12 +3,14 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
-import User from "../models/user-modal";
+import {UserDB} from "../repository/mongoDB/userDB";
 import { generateJWT, clearJWT } from "../utils/jwt-utils";
+import { IUserRepository } from "repository/UserRepository";
 
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const userDB: IUserRepository = new UserDB();
 
 /* * Method to handle errors in the application.
  *  @param res - 500.
@@ -30,8 +32,8 @@ const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const existingEmail = await User.findOne({ email });
-    const existingUsername = await User.findOne({ username });
+    const existingEmail = await userDB.findByEmail(email);
+    const existingUsername = await userDB.findByUsername(username);
 
     if (existingEmail || existingUsername) {
       res.status(400).json({
@@ -43,8 +45,7 @@ const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword });
-    await newUser.save();
+    await userDB.createUser({ username, email, password: hashedPassword });
 
     res.status(201).json({ message: "User created successfully!" });
   } catch (error) {
@@ -65,8 +66,8 @@ const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const user = identifier.includes("@")
-      ? await User.findOne({ email: identifier })
-      : await User.findOne({ username: identifier });
+      ? await userDB.findByEmail(identifier)
+      : await userDB.findByUsername(identifier);
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       res.status(400).json({ message: "Invalid credentials!" });
@@ -110,7 +111,7 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     const decoded = jwt.verify(token, JWT_SECRET) as unknown as {
       email: string;
     };
-    const user = await User.findOne({ email: decoded.email });
+    const user = await userDB.findByEmail(decoded.email);
 
     if (!user) {
       res.status(400).json({ message: "User not found!" });
@@ -134,7 +135,7 @@ const getUser = async (
   res: Response
 ): Promise<void> => {
   try {
-    const user = await User.findById(req.user?._id).select("-password");
+    const user = await userDB.findById(req.user?._id);
 
     if (!user) {
       res.status(400).json({ message: "User not found!" });
