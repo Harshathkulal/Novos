@@ -7,7 +7,7 @@ import { setupSocket } from "./socket/socket";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT!;
 
 connectDB();
 
@@ -15,13 +15,17 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: process.env.CLIENT_URL!,
     methods: ["GET", "POST"],
   },
 });
 
 setupSocket(io);
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+io.on("connection", (socket) => {
+  console.log("socket connected:", socket.id);
+});
+
+server.listen(PORT, () => {
+  console.log(`Server running on Port:${PORT}`);
 });

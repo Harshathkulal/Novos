@@ -1,7 +1,9 @@
 import { Response } from "express"
 import jwt from "jsonwebtoken"
+import dotenv from "dotenv";
+dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || "secret"
+const JWT_SECRET = process.env.JWT_SECRET_KEY!;
 const JWT_EXPIRY = process.env.JWT_EXPIRY || "7d"
 
 const generateJWT = (res: Response, userId: string) => {

@@ -12,7 +12,7 @@ declare global {
 
 const userDB = new UserDB()
 
-const JWT_SECRET = process.env.JWT_SECRET || "secret"
+const JWT_SECRET = process.env.JWT_SECRET_KEY!
 
 /* * Method to protect User.
  * params req - cookies.

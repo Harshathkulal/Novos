@@ -8,8 +8,10 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/services/authService";
+import { useAuth } from "@/redux/AuthProvider";
 
 export default function LoginPage() {
+  const { setUser } = useAuth();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -30,8 +32,10 @@ export default function LoginPage() {
     setSuccess("");
 
     try {
-      await loginUser(form.email, form.password);
-      setSuccess("Login successful!");
+      const user = await loginUser(form.email, form.password);
+      console.log(user.user._id)
+      setUser(user.user._id);
+      setSuccess(user.message);
       setForm({ email: "", password: "" });
 
       router.push("/chat");

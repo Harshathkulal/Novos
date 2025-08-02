@@ -10,6 +10,8 @@ import {
 import api from "@/lib/axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getAllUser } from "@/services/userService";
+import { useAuth } from "@/redux/AuthProvider";
 
 interface User {
   _id: string;
@@ -23,37 +25,32 @@ interface Message {
 }
 
 export default function Chat() {
+  const { userId } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
-  const [userId, setUserId] = useState(""); // Current user ID
   const [receiver, setReceiver] = useState<User | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  console.log(userId)
 
   // 1. On mount, get current user + list of users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await api.get("/auth/getUser"); // Your endpoint that returns current user info
-        const me = res.data;
-        setUserId(me.user._id);
-
-        const allUsers = await api.get("/user"); // Endpoint that returns all users
-        setUsers(allUsers.data.filter((u: User) => u._id !== me._id));
+        const allUsers = await getAllUser();
+        setUsers(allUsers.users);
       } catch (err) {
         console.error("Error fetching users", err);
       }
     };
 
     fetchUsers();
-  }, []);
+  }, [userId]);
 
   // 2. Initialize socket once when userId is available
   useEffect(() => {
     if (!userId) return;
 
-    initiateSocket(userId);
+    initiateSocket(userId as string);
     subscribeToMessages((message) => {
       setMessages((prev) => [...prev, message]);
     });
@@ -105,7 +102,7 @@ export default function Chat() {
     // Optimistic UI update
     setMessages((prev) => [
       ...prev,
-      { senderId: userId, receiverId: receiver._id, message: input },
+      { senderId: userId as string, receiverId: receiver._id, message: input },
     ]);
 
     setInput("");

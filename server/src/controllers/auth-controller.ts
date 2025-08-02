@@ -3,13 +3,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
-import {UserDB} from "../repository/mongoDB/userDB";
+import { UserDB } from "../repository/mongoDB/userDB";
 import { generateJWT, clearJWT } from "../utils/jwt-utils";
 import { IUserRepository } from "repository/UserRepository";
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET_KEY!;
 const userDB: IUserRepository = new UserDB();
 
 /* * Method to handle errors in the application.
@@ -75,7 +75,14 @@ const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     generateJWT(res, user._id as unknown as string);
-    res.status(200).json({ message: "Login successful!" });
+    res.status(200).json({
+      message: "Login successful!",
+      user: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+      },
+    });
   } catch (error) {
     handleError(res, error);
   }
@@ -142,7 +149,11 @@ const getUser = async (
       return;
     }
 
-    res.status(200).json({ message: "User fetched successfully!", user });
+    res.status(200).json({ message: "User fetched successfully!", user: {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+      }, });
   } catch (error) {
     handleError(res, error);
   }
