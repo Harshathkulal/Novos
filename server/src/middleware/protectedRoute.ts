@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import jwt from "jsonwebtoken"
-import User from "../models/user-modal"
+import { UserDB } from "../repository/mongoDB/userDB"
 
 declare global {
   namespace Express {
@@ -9,6 +9,8 @@ declare global {
     }
   }
 }
+
+const userDB = new UserDB()
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret"
 
@@ -31,7 +33,7 @@ export const protectRoute = async (
       res.status(401).json({ message: "Not authorized, invalid token" })
       return
     }
-    const user = await User.findById(decode.userId).select("-password")
+    const user = await userDB.findById(decode.userId)
     if (!user) {
       res.status(401).json({ message: "Not authorized, user not found" })
       return

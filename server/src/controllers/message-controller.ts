@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import Conversation from "../models/conversation-modal";
-import Message from "../models/message-modal";
+import { MessageRepository } from "../repository/mongoDB/messageDB";
 import { getReceiverSocketId, getIOInstance } from "../socket/socket";
+
+const messageDB = new MessageRepository();
 
 /**
  * Sends a message from the logged-in user to the specified receiver.
@@ -30,19 +31,18 @@ export const sendMessage = async (
     }
 
     // Find existing conversation including both sender and receiver
-    let conversation = await Conversation.findOne({
-      participants: { $all: [senderId, receiverId] },
-    });
+    let conversation = await messageDB.findConversationBetweenUsers(
+      senderId,
+      receiverId
+    );
 
     // Create new conversation if none exists
     if (!conversation) {
-      conversation = await Conversation.create({
-        participants: [senderId, receiverId],
-      });
+      conversation = await messageDB.createConversation([senderId, receiverId]);
     }
 
     // Create new message document
-    const newMessage = new Message({
+    const newMessage = await messageDB.createMessage({
       senderId,
       receiverId,
       message,
@@ -96,9 +96,10 @@ export const getMessages = async (
     }
 
     // Find conversation between the two users and populate messages
-    const conversation = await Conversation.findOne({
-      participants: { $all: [senderId, userToChatId] },
-    }).populate("messages");
+    const conversation = await messageDB.getMessagesForConversation(
+      senderId,
+      userToChatId
+    );
 
     // Return empty array if no conversation found
     if (!conversation) {

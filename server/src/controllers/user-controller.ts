@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
-import User from "../models/user-modal";
+import {UserDB} from "../repository/mongoDB/userDB";
+
+const userDB = new UserDB();
 
 export const getAllUser = async (
   req: Request & { user?: { _id: string } },
@@ -13,7 +15,7 @@ export const getAllUser = async (
       return;
     }
 
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+    const filteredUsers = await userDB.findAllUsers(loggedInUserId);
 
     res.status(200).json(filteredUsers);
   } catch (error: any) {
