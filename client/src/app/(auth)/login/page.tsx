@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/services/authService";
 import { useAuth } from "@/redux/AuthProvider";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const { setUser } = useAuth();
@@ -18,33 +19,30 @@ export default function LoginPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError("");
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
+    setLoading(true);
 
     try {
       const user = await loginUser(form.email, form.password);
-      console.log(user.user._id)
       setUser(user.user._id);
-      setSuccess(user.message);
       setForm({ email: "", password: "" });
 
       router.push("/chat");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
-      } else {
-        setError("An unexpected error occurred.");
       }
+      toast.error("Login failed.");
     } finally {
       setLoading(false);
     }
@@ -98,11 +96,6 @@ export default function LoginPage() {
           {error && (
             <p className="text-sm text-red-500 font-medium text-center">
               {error}
-            </p>
-          )}
-          {success && (
-            <p className="text-sm text-green-600 font-medium text-center">
-              {success}
             </p>
           )}
 

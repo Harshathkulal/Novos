@@ -7,11 +7,12 @@ import {
   subscribeToMessages,
   disconnectSocket,
 } from "@/lib/socket";
-import api from "@/lib/axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getAllUser } from "@/services/userService";
 import { useAuth } from "@/redux/AuthProvider";
+import { getMessage, sendMessage } from "@/services/messageService";
+import { toast } from "sonner"
 
 interface User {
   _id: string;
@@ -38,8 +39,8 @@ export default function Chat() {
       try {
         const allUsers = await getAllUser();
         setUsers(allUsers.users);
-      } catch (err) {
-        console.error("Error fetching users", err);
+      } catch {
+        toast.error("Failed to fetch users.");
       }
     };
 
@@ -70,11 +71,10 @@ export default function Chat() {
 
     const fetchMessages = async () => {
       try {
-        const res = await api.get(`/messages/${receiver._id}`);
-        console.log(res.data)
-        setMessages(res.data);
-      } catch (err) {
-        console.error("Failed to load messages", err);
+        const res = await getMessage(receiver._id);
+        setMessages(res);
+      } catch {
+        toast.error("Failed to fetch messages.");
       }
     };
 
@@ -94,7 +94,7 @@ export default function Chat() {
 
     // Persist via HTTP
     try {
-      await api.post(`/messages/send/${receiver._id}`, { message: input });
+      await sendMessage(receiver._id, input);
     } catch (err) {
       console.error("Failed to save message", err);
     }

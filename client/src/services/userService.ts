@@ -4,7 +4,8 @@ export const getAllUser = async () => {
   try {
     const allUsers = await api.get("/user");
     return allUsers.data;
-  } catch (err) {
-    console.error("Error fetching users", err);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    throw new Error(err.response?.data?.message || "Failed to fetch users");
   }
 };

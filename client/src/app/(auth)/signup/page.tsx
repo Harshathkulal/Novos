@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { registerUser } from "@/services/authService";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -17,17 +19,17 @@ export default function SignupPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const Router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError("");
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords don't match.");
@@ -38,14 +40,15 @@ export default function SignupPage() {
       setLoading(true);
       await registerUser(form.username, form.email, form.password);
 
-      setSuccess("Registration successful. You can now log in.");
+      toast.success("Registration successful. You can now log in.");
       setForm({ username: "", email: "", password: "", confirmPassword: "" });
+
+      Router.push("/login");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
-      } else {
-        setError("An unexpected error occurred.");
       }
+      toast.error("Registration failed.");
     } finally {
       setLoading(false);
     }
@@ -126,12 +129,6 @@ export default function SignupPage() {
               {error}
             </p>
           )}
-          {success && (
-            <p className="text-sm text-green-600 font-medium text-center">
-              {success}
-            </p>
-          )}
-
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Creating account..." : "Sign Up"}
           </Button>
