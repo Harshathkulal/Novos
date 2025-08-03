@@ -51,7 +51,7 @@ export class MessageRepository {
     }));
 
     return {
-      messages
+      messages,
     };
   }
 }

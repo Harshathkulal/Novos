@@ -1,11 +1,9 @@
-import app from "./app";
+import "./config/env";
 import connectDB from "./db/database";
-import dotenv from "dotenv";
+import app from "./app";
 import http from "http";
 import { Server } from "socket.io";
 import { setupSocket } from "./socket/socket";
-
-dotenv.config();
 
 const PORT = process.env.PORT!;
 

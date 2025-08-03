@@ -29,7 +29,11 @@ export const sendMessage = async (
       return;
     }
 
-    const newMessage = await messageService.sendMessage(senderId, receiverId, message);
+    const newMessage = await messageService.sendMessage(
+      senderId,
+      receiverId,
+      message
+    );
 
     emitNewMessage(receiverId, newMessage);
 
@@ -64,7 +68,10 @@ export const getMessages = async (
       return;
     }
 
-    const messages = await messageService.getConversationMessages(senderId, userToChatId);
+    const messages = await messageService.getConversationMessages(
+      senderId,
+      userToChatId
+    );
     res.status(200).json(messages);
   } catch (error: any) {
     console.error("Error in getMessages:", error.message);

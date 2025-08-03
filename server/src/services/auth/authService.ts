@@ -6,25 +6,31 @@ import dotenv from "dotenv";
 dotenv.config();
 
 interface Register {
-    username: string;
-    email: string;
-    password: string;
+  username: string;
+  email: string;
+  password: string;
 }
 
 interface Login {
-    identifier: string;
-    password: string;
+  identifier: string;
+  password: string;
 }
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY!;
 const userRepo: IUserRepository = new UserDB();
 
 export class AuthService {
-  async register({ username, email, password }: Register): Promise<{ message: string }> {
+  async register({
+    username,
+    email,
+    password,
+  }: Register): Promise<{ message: string }> {
     const existingEmail = await userRepo.findByEmail(email);
     const existingUsername = await userRepo.findByUsername(username);
     if (existingEmail || existingUsername) {
-      throw new Error(existingEmail ? "Email already exists!" : "Username already exists!");
+      throw new Error(
+        existingEmail ? "Email already exists!" : "Username already exists!"
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,7 +38,10 @@ export class AuthService {
     return { message: "User created successfully!" };
   }
 
-  async login({ identifier, password }: Login): Promise<{ message: string; user: any }> {
+  async login({
+    identifier,
+    password,
+  }: Login): Promise<{ message: string; user: any }> {
     const user = identifier.includes("@")
       ? await userRepo.findByEmail(identifier)
       : await userRepo.findByUsername(identifier);
@@ -49,7 +58,6 @@ export class AuthService {
       },
     };
   }
-
 
   async session(token: string) {
     try {

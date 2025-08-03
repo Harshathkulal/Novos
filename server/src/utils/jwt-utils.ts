@@ -1,28 +1,28 @@
-import { Response } from "express"
-import jwt from "jsonwebtoken"
-import dotenv from "dotenv";
-dotenv.config();
+import { Response } from "express";
+import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY!;
-const JWT_EXPIRY = process.env.JWT_EXPIRY || "7d"
+const JWT_EXPIRY = process.env.JWT_EXPIRY!;
 
 const generateJWT = (res: Response, userId: string) => {
-  let expiryInSeconds: number
+  let expiryInSeconds: number;
   if (JWT_EXPIRY.endsWith("d")) {
-    expiryInSeconds = parseInt(JWT_EXPIRY.slice(0, -1)) * 24 * 60 * 60
+    expiryInSeconds = parseInt(JWT_EXPIRY.slice(0, -1)) * 24 * 60 * 60;
   } else if (JWT_EXPIRY.endsWith("h")) {
-    expiryInSeconds = parseInt(JWT_EXPIRY.slice(0, -1)) * 60 * 60
+    expiryInSeconds = parseInt(JWT_EXPIRY.slice(0, -1)) * 60 * 60;
   } else if (JWT_EXPIRY.endsWith("m")) {
-    expiryInSeconds = parseInt(JWT_EXPIRY.slice(0, -1)) * 60
+    expiryInSeconds = parseInt(JWT_EXPIRY.slice(0, -1)) * 60;
   } else {
-    expiryInSeconds = parseInt(JWT_EXPIRY)
+    expiryInSeconds = parseInt(JWT_EXPIRY);
   }
 
   if (isNaN(expiryInSeconds)) {
-    throw new Error("Invalid JWT_EXPIRY value")
+    throw new Error("Invalid JWT_EXPIRY value");
   }
 
-  const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: expiryInSeconds })
+  const token = jwt.sign({ userId }, JWT_SECRET, {
+    expiresIn: expiryInSeconds,
+  });
 
   res.cookie("jwt", token, {
     httpOnly: true,
@@ -30,8 +30,8 @@ const generateJWT = (res: Response, userId: string) => {
     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
     maxAge: expiryInSeconds * 1000,
     path: "/",
-  })
-}
+  });
+};
 
 const clearJWT = (res: Response) => {
   res.cookie("jwt", "", {
@@ -40,7 +40,7 @@ const clearJWT = (res: Response) => {
     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
     expires: new Date(0),
     path: "/",
-  })
-}
+  });
+};
 
-export { generateJWT, clearJWT }
+export { generateJWT, clearJWT };
