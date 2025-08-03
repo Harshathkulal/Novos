@@ -2,11 +2,23 @@ import User from "../../models/user-modal";
 
 export class UserDB {
   async findAllUsers(userId: string) {
-    return await User.find({ _id: { $ne: userId } }).select("-password");
+    const users = await User.find({ _id: { $ne: userId } }).select("-password");
+    return users.map((user: any) => ({
+      id: user._id.toString(),
+      username: user.username,
+      profileImg: user.profileImg,
+    }));
   }
 
   async findById(id: string) {
-    return await User.findById(id).select("-password");
+    const user = await User.findById(id).select("-password");
+    if (!user) return null;
+    return {
+      id: (user._id as string).toString(),
+      username: user.username,
+      email: user.email,
+      profileImg: user.profileImg,
+    };
   }
 
   async findByEmail(email: string) {

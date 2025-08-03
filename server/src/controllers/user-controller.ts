@@ -9,11 +9,11 @@ const userService = new UserService();
  * @param res - Responds with the user details or an error message.
  */
 export const getUser = async (
-  req: Request & { user?: { _id: string } },
+  req: Request & { user?: { id: string } },
   res: Response
 ): Promise<void> => {
   try {
-    const user = await userService.getUserById(req.user?._id);
+    const user = await userService.getUserById(req.user?.id);
 
     if (!user) {
       res.status(400).json({ message: "User not found!" });
@@ -32,11 +32,11 @@ export const getUser = async (
  * @param res - Responds with an array of users or an error message.
  */
 export const getAllUsers = async (
-  req: Request & { user?: { _id: string } },
+  req: Request & { user?: { id: string } },
   res: Response
 ): Promise<void> => {
   try {
-    const loggedInUserId = req.user?._id;
+    const loggedInUserId = req.user?.id;
 
     if (!loggedInUserId) {
       res.status(401).json({ error: "Unauthorized please Log In" });

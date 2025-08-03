@@ -34,8 +34,24 @@ export class MessageRepository {
   }
 
   async getMessagesForConversation(user1: string, user2: string) {
-    return await Conversation.findOne({
+    const conversation = await Conversation.findOne({
       participants: { $all: [user1, user2] },
     }).populate("messages");
+
+    if (!conversation) return;
+
+    // Convert raw MongoDB messages to consistent format
+    const messages = conversation.messages.map((msg: any) => ({
+      id: msg._id.toString(),
+      message: msg.message,
+      senderId: {
+        id: msg.senderId._id.toString(),
+      },
+      createdAt: msg.createdAt,
+    }));
+
+    return {
+      messages
+    };
   }
 }

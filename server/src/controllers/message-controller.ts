@@ -15,13 +15,13 @@ const messageService = new MessageService();
  * @param res - Responds with the saved message or an error.
  */
 export const sendMessage = async (
-  req: Request & { user?: { _id: string } },
+  req: Request & { user?: { id: string } },
   res: Response
 ): Promise<void> => {
   try {
     const { message } = req.body;
     const receiverId = req.params.id;
-    const senderId = req.user?._id;
+    const senderId = req.user?.id;
 
     // Verify sender is authenticated
     if (!senderId) {
@@ -51,12 +51,12 @@ export const sendMessage = async (
  * @param res - messages or error response
  */
 export const getMessages = async (
-  req: Request & { user?: { _id: string } },
+  req: Request & { user?: { id: string } },
   res: Response
 ): Promise<void> => {
   try {
     const userToChatId = req.params.id;
-    const senderId = req.user?._id;
+    const senderId = req.user?.id;
 
     // Verify sender is authenticated
     if (!senderId) {

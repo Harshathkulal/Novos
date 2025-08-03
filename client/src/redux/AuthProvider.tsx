@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "@/lib/axios";
 
-type User = { _id: string; fullName: string; email: string };
+type User = { id: string; fullName: string; email: string };
 interface AuthContextType {
   userId: User | string | null;
   loading: boolean;
@@ -28,8 +28,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/auth/getUser");
-      setUser(res.data.user._id);
+      const res = await api.get("/getUser");
+      setUser(res.data.user.id);
       setError(null);
     } catch (err) {
       console.error("Failed to load user:", err);

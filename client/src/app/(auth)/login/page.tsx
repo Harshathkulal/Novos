@@ -34,7 +34,7 @@ export default function LoginPage() {
 
     try {
       const user = await loginUser(form.email, form.password);
-      setUser(user.user._id);
+      setUser(user.user.id);
       setForm({ email: "", password: "" });
 
       router.push("/chat");

@@ -8,7 +8,6 @@ export const initiateSocket = (userId: string | null) => {
   });
 
   socket.on("connect", () => {
-    console.log("Connected with socket id:", socket?.id);
   });
 };
 

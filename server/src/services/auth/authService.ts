@@ -43,7 +43,7 @@ export class AuthService {
     return {
       message: "Login successful!",
       user: {
-        _id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
       },
@@ -68,7 +68,7 @@ export class AuthService {
       return {
         message: "Token is valid!",
         user: {
-          _id: user._id,
+          id: user.id,
           fullName: user.fullName,
           email: user.email,
         },

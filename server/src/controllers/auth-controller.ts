@@ -32,7 +32,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { identifier, password } = req.body;
     const result = await authService.login({ identifier, password });
-    generateJWT(res, result.user._id as unknown as string);
+    generateJWT(res, result.user.id as unknown as string);
     res.status(200).json(result);
   } catch (error) {
     handleError(res, error);

@@ -15,8 +15,8 @@ import { getMessage, sendMessage } from "@/services/messageService";
 import { toast } from "sonner"
 
 interface User {
-  _id: string;
-  fullName: string;
+  id: string;
+  username: string;
 }
 
 interface Message {
@@ -71,7 +71,7 @@ export default function Chat() {
 
     const fetchMessages = async () => {
       try {
-        const res = await getMessage(receiver._id);
+        const res = await getMessage(receiver.id);
         setMessages(res);
       } catch {
         toast.error("Failed to fetch messages.");
@@ -90,11 +90,11 @@ export default function Chat() {
     if (!input.trim() || !receiver) return;
 
     // WebSocket message
-    sendSocketMessage(input, receiver._id);
+    sendSocketMessage(input, receiver.id);
 
     // Persist via HTTP
     try {
-      await sendMessage(receiver._id, input);
+      await sendMessage(receiver.id, input);
     } catch (err) {
       console.error("Failed to save message", err);
     }
@@ -102,7 +102,7 @@ export default function Chat() {
     // Optimistic UI update
     setMessages((prev) => [
       ...prev,
-      { senderId: userId as string, receiverId: receiver._id, message: input },
+      { senderId: userId as string, receiverId: receiver.id, message: input },
     ]);
 
     setInput("");
@@ -115,11 +115,11 @@ export default function Chat() {
         <h2 className="font-bold mb-4">Users</h2>
         {users.map((user) => (
           <div
-            key={user._id}
+            key={user.id}
             className="cursor-pointer p-2 hover:bg-gray-100 rounded"
             onClick={() => setReceiver(user)}
           >
-            {user.fullName}
+            {user.username}
           </div>
         ))}
       </div>
@@ -129,7 +129,7 @@ export default function Chat() {
         {receiver ? (
           <>
             <h2 className="text-lg font-semibold mb-4 border-b pb-2">
-              Chat with {receiver.fullName}
+              Chat with {receiver.username}
             </h2>
             <div className="flex flex-col flex-1 overflow-y-auto space-y-2 mb-4">
               {messages?.map((msg, idx) => (

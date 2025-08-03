@@ -29,11 +29,11 @@ export class MessageService {
       message,
     });
 
-    conversation.messages.push(newMessage._id as any);
+    conversation.messages.push(newMessage.id as any);
 
     await Promise.all([conversation.save(), newMessage.save()]);
 
-    return newMessage;
+    return { successful: true };
   }
 
   /**
@@ -48,6 +48,14 @@ export class MessageService {
       userId2
     );
 
-    return conversation?.messages || [];
+    const rawMessages = conversation?.messages || [];
+    const formattedMessages = rawMessages.map((msg: any) => ({
+      id: msg.id,
+      message: msg.message,
+      senderId: msg.senderId.id,
+      createdAt: msg.createdAt,
+    }));
+
+    return formattedMessages;
   }
 }
