@@ -12,7 +12,7 @@ import { useAuth } from "@/redux/AuthProvider";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const { setUser } = useAuth();
+  const { setUserId } = useAuth();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -34,7 +34,7 @@ export default function LoginPage() {
 
     try {
       const user = await loginUser(form.email, form.password);
-      setUser(user.user.id);
+      setUserId(user.user.id);
       setForm({ email: "", password: "" });
 
       router.push("/chat");

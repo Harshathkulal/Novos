@@ -1,35 +1,27 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import api from "@/lib/axios";
-
-type User = { id: string; fullName: string; email: string };
-interface AuthContextType {
-  userId: User | string | null;
-  loading: boolean;
-  error: string | null;
-  setUser: (user: User | null) => void;
-  refetch: () => Promise<void>;
-}
+import { getUser } from "@/services/userService";
+import { AuthContextType } from "@/types/main.type";
 
 const AuthContext = createContext<AuthContextType>({
-  userId: "",
+  userId: null,
   loading: true,
   error: null,
-  setUser: () => {},
+  setUserId: () => {},
   refetch: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [userId, setUser] = useState<User | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/getUser");
-      setUser(res.data.user.id);
+      const res = await getUser();
+      setUserId(res.id);
       setError(null);
     } catch (err) {
       console.error("Failed to load user:", err);
@@ -44,7 +36,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ userId, loading, error, refetch: fetchUser ,setUser}}>
+    <AuthContext.Provider
+      value={{ userId, loading, error, refetch: fetchUser, setUserId }}
+    >
       {children}
     </AuthContext.Provider>
   );
