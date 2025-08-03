@@ -1,19 +1,18 @@
 import { Request, Response } from "express";
-import { MessageRepository } from "../repository/mongoDB/messageDB";
-import { getReceiverSocketId, getIOInstance } from "../socket/socket";
+import { MessageService } from "../services/messageServices";
+import { emitNewMessage } from "../services/socketService";
 
-const messageDB = new MessageRepository();
+const messageService = new MessageService();
 
 /**
- * Sends a message from the logged-in user to the specified receiver.
+ * Sends a message from the logged-in user to another user.
  *
- * - Checks for an existing conversation between the users, creates one if not found.
- * - Creates a new message document and associates it with the conversation.
- * - Saves both conversation and message concurrently.
- * - Emits the new message to the receiver via Socket.IO if the receiver is online.
+ * - Validates that the sender is authenticated.
+ * - Saves the message to the database.
+ * - Emits the new message to the receiver's socket.
  *
- * @param req - message,receiverId, and senderId
- * @param res - newMessage or error response
+ * @param req - Contains the message and receiver ID in params and body.
+ * @param res - Responds with the saved message or an error.
  */
 export const sendMessage = async (
   req: Request & { user?: { _id: string } },
@@ -26,60 +25,30 @@ export const sendMessage = async (
 
     // Verify sender is authenticated
     if (!senderId) {
-      res.status(401).json({ error: "Unauthorized: sender ID missing" });
+      res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
-    // Find existing conversation including both sender and receiver
-    let conversation = await messageDB.findConversationBetweenUsers(
-      senderId,
-      receiverId
-    );
+    const newMessage = await messageService.sendMessage(senderId, receiverId, message);
 
-    // Create new conversation if none exists
-    if (!conversation) {
-      conversation = await messageDB.createConversation([senderId, receiverId]);
-    }
-
-    // Create new message document
-    const newMessage = await messageDB.createMessage({
-      senderId,
-      receiverId,
-      message,
-    });
-
-    // Link message to conversation
-    conversation.messages.push(
-      newMessage._id as (typeof conversation.messages)[0]
-    );
-
-    // Save both conversation and message in parallel
-    await Promise.all([conversation.save(), newMessage.save()]);
-
-    // Emit new message to receiver if connected via socket
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    if (receiverSocketId) {
-      const io = getIOInstance();
-      io.to(receiverSocketId).emit("newMessage", newMessage);
-    }
+    emitNewMessage(receiverId, newMessage);
 
     // Respond with the saved message
     res.status(201).json(newMessage);
   } catch (error: any) {
-    console.error("Error in sendMessage controller:", error.message);
+    console.error("Error in sendMessage:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
 /**
- * Retrieves all messages exchanged between the logged-in user and another specified user.
+ * Retrieves all messages exchanged between the logged-in user and the specified user.
  *
- * - Finds the conversation containing both users.
- * - Populates the messages array with the full message documents.
- * - Returns an empty array if no conversation exists.
+ * - Fetches messages from the conversation between the two users.
+ * - Returns an array of messages or an empty array if no messages are found.
  *
- * @param req - userToChatId from params and senderId from user object.
- * @param res - array of messages or empty array if no conversation found.
+ * @param req - userToChatId from params and senderId from user
+ * @param res - messages or error response
  */
 export const getMessages = async (
   req: Request & { user?: { _id: string } },
@@ -91,26 +60,14 @@ export const getMessages = async (
 
     // Verify sender is authenticated
     if (!senderId) {
-      res.status(401).json({ error: "Unauthorized: sender ID missing" });
+      res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
-    // Find conversation between the two users and populate messages
-    const conversation = await messageDB.getMessagesForConversation(
-      senderId,
-      userToChatId
-    );
-
-    // Return empty array if no conversation found
-    if (!conversation) {
-      res.status(200).json([]);
-      return;
-    }
-
-    // Respond with populated messages
-    res.status(200).json(conversation.messages);
+    const messages = await messageService.getConversationMessages(senderId, userToChatId);
+    res.status(200).json(messages);
   } catch (error: any) {
-    console.error("Error in getMessages controller:", error.message);
+    console.error("Error in getMessages:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

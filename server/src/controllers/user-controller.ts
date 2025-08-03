@@ -1,9 +1,37 @@
 import { Request, Response } from "express";
-import { UserDB } from "../repository/mongoDB/userDB";
+import { UserService } from "../services/userServices";
 
-const userDB = new UserDB();
+const userService = new UserService();
 
-export const getAllUser = async (
+/**
+ * Retrieves the logged-in user's details.
+ * @param req - Contains the logged-in user's ID from the request object.
+ * @param res - Responds with the user details or an error message.
+ */
+export const getUser = async (
+  req: Request & { user?: { _id: string } },
+  res: Response
+): Promise<void> => {
+  try {
+    const user = await userService.getUserById(req.user?._id);
+
+    if (!user) {
+      res.status(400).json({ message: "User not found!" });
+      return;
+    }
+    res.status(200).json(user);
+  } catch (error: any) {
+    console.error("failed to fetch User:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * Retrieves all users except the logged-in user.
+ * @param req - Contains the logged-in user's ID from the request object.
+ * @param res - Responds with an array of users or an error message.
+ */
+export const getAllUsers = async (
   req: Request & { user?: { _id: string } },
   res: Response
 ): Promise<void> => {
@@ -15,18 +43,14 @@ export const getAllUser = async (
       return;
     }
 
-    const filteredUsers = await userDB.findAllUsers(loggedInUserId);
+    const users = await userService.getAllUsers(loggedInUserId);
 
     res.status(200).json({
-      message: "User fetched successfully!",
-      users: filteredUsers.map((user) => ({
-        _id: user._id,
-        fullName: user.fullName,
-        profileImg: user.profileImg,
-      })),
+      message: "Users fetched successfully!",
+      users,
     });
   } catch (error: any) {
-    console.error("failed to fetch User:", error.message);
+    console.error("failed to fetch Users:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
