@@ -33,6 +33,7 @@ export interface ChatWindowProps {
   onSend: () => void;
   messagesEndRef: RefObject<HTMLDivElement | null>;
   userId: string | null;
+  onBack?: () => void;
 }
 
 // types for UserListProps Component

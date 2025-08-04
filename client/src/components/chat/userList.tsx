@@ -2,17 +2,19 @@ import { UserListProps } from "@/types/chat.types";
 
 export default function UserList({ users, onSelect }: UserListProps) {
   return (
-    <div className="w-64 border-r p-4 overflow-y-auto">
-      <h2 className="font-bold mb-4">Users</h2>
-      {users.map((user) => (
-        <div
-          key={user.id}
-          className="cursor-pointer p-2 hover:bg-gray-100 rounded"
-          onClick={() => onSelect(user)}
-        >
-          {user.username}
-        </div>
-      ))}
+    <div className="h-full flex flex-col overflow-hidden">
+      <h2 className="text-xl font-semibold p-4 border-b">Users</h2>
+      <div className="flex-1 overflow-y-auto p-4">
+        {users.map((user) => (
+          <button
+            key={user.id}
+            className="w-full text-left p-2 rounded hover:bg-gray-100 transition-colors"
+            onClick={() => onSelect(user)}
+          >
+            {user.username}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

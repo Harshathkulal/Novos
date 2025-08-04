@@ -10,6 +10,7 @@ export default function ChatWindow({
   onSend,
   messagesEndRef,
   userId,
+  onBack,
 }: ChatWindowProps) {
   if (!receiver) {
     return (
@@ -20,16 +21,25 @@ export default function ChatWindow({
   }
 
   return (
-    <div className="flex-1 flex flex-col p-4">
-      <h2 className="text-lg font-semibold mb-4 border-b pb-2">
-        Chat with {receiver.username}
-      </h2>
-      <MessageList
-        messages={messages}
-        userId={userId}
-        messagesEndRef={messagesEndRef}
-      />
-      <ChatInput input={input} setInput={setInput} onSend={onSend} />
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b flex items-center justify-between">
+        {onBack && (
+          <button className="text-sm text-blue-600 md:hidden" onClick={onBack}>
+            ← Back
+          </button>
+        )}
+        <h2 className="text-lg font-semibold">Chat with {receiver.username}</h2>
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-2">
+        <MessageList
+          messages={messages}
+          userId={userId}
+          messagesEndRef={messagesEndRef}
+        />
+      </div>
+      <div className="p-4 border-t">
+        <ChatInput input={input} setInput={setInput} onSend={onSend} />
+      </div>
     </div>
   );
 }

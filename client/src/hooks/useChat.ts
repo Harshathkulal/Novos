@@ -22,6 +22,7 @@ export const useChat = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (!userId) return;
     const fetchUsers = async () => {
       try {
         const res = await getAllUser();

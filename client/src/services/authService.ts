@@ -32,3 +32,16 @@ export const registerUser = async (
     throw new Error(error.response?.data?.message || "Registration failed");
   }
 };
+
+export const getSession = async (token:string) => {
+  try {
+    const response = await api.post("/auth/session", {
+      token,
+    });
+
+    return response.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "No session Found");
+  }
+};
