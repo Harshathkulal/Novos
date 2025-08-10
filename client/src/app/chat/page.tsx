@@ -2,6 +2,9 @@
 import ChatWindow from "@/components/chat/chatWindow";
 import UserList from "@/components/chat/userList";
 import { useChat } from "@/hooks/useChat";
+import { useAuth } from "@/redux/AuthProvider";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Chat() {
   const {
@@ -16,9 +19,17 @@ export default function Chat() {
     userId,
   } = useChat();
 
+  const { userId: authUserId, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !authUserId) {
+      router.push("/login");
+    }
+  }, [authUserId, loading, router]);
+
   return (
     <div className="flex h-screen">
-      {/* User List */}
       <div
         className={`w-full md:w-1/3 border-r ${
           receiver ? "hidden" : "block"
@@ -27,7 +38,6 @@ export default function Chat() {
         <UserList users={users} onSelect={setReceiver} />
       </div>
 
-      {/* Chat Window */}
       <div
         className={`w-full md:w-2/3 ${receiver ? "block" : "hidden"} md:block`}
       >

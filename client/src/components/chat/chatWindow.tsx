@@ -14,7 +14,7 @@ export default function ChatWindow({
 }: ChatWindowProps) {
   if (!receiver) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500">
+      <div className="flex-1 flex items-center justify-center">
         Select a user to start chatting.
       </div>
     );
@@ -24,7 +24,7 @@ export default function ChatWindow({
     <div className="h-full flex flex-col">
       <div className="p-4 border-b flex items-center justify-between">
         {onBack && (
-          <button className="text-sm text-blue-600 md:hidden" onClick={onBack}>
+          <button className="text-sm md:hidden" onClick={onBack}>
             ← Back
           </button>
         )}
