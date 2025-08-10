@@ -6,8 +6,7 @@ export const loginUser = async (email: string, password: string) => {
       identifier: email,
       password,
     });
-
-    return response.data;
+    return response.data.data;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Login failed");

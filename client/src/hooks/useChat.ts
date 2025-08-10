@@ -26,7 +26,7 @@ export const useChat = () => {
     const fetchUsers = async () => {
       try {
         const res = await getAllUser();
-        setUsers(res.users);
+        setUsers(res.data);
       } catch {
         toast.error("Failed to fetch users.");
       }
@@ -57,7 +57,7 @@ export const useChat = () => {
 
       try {
         const res = await getMessage(receiver.id);
-        setMessages(res);
+        setMessages(res.data);
       } catch {
         toast.error("Failed to fetch messages.");
       }

@@ -22,11 +22,13 @@ export class UserDB {
   }
 
   async findByEmail(email: string) {
-    return await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
+    return user;
   }
 
   async findByUsername(username: string) {
-    return await User.findOne({ username });
+    const user = await User.findOne({ username }).select("+password");
+    return user;
   }
 
   async createUser(data: {

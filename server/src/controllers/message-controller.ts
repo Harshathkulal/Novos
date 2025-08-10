@@ -1,32 +1,21 @@
 import { Request, Response } from "express";
 import { MessageService } from "../services/messageServices";
 import { emitNewMessage } from "../services/socketService";
+import { asyncHandler } from "../utils/asyncHandler";
+import { ApiResponse } from "../utils/apiResponse";
+import { ApiError } from "../utils/apiError";
 
 const messageService = new MessageService();
 
-/**
- * Sends a message from the logged-in user to another user.
- *
- * - Validates that the sender is authenticated.
- * - Saves the message to the database.
- * - Emits the new message to the receiver's socket.
- *
- * @param req - Contains the message and receiver ID in params and body.
- * @param res - Responds with the saved message or an error.
- */
-export const sendMessage = async (
-  req: Request & { user?: { id: string } },
-  res: Response
-): Promise<void> => {
-  try {
+/**  Send Message Controller **/
+export const sendMessage = asyncHandler(
+  async (req: Request & { user?: { id: string } }, res: Response) => {
     const { message } = req.body;
     const receiverId = req.params.id;
     const senderId = req.user?.id;
 
-    // Verify sender is authenticated
     if (!senderId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
+      throw new ApiError(401, "Unauthorized");
     }
 
     const newMessage = await messageService.sendMessage(
@@ -37,44 +26,29 @@ export const sendMessage = async (
 
     emitNewMessage(receiverId, newMessage);
 
-    // Respond with the saved message
-    res.status(201).json(newMessage);
-  } catch (error: any) {
-    console.error("Error in sendMessage:", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    res
+      .status(201)
+      .json(new ApiResponse(201, newMessage, "Message sent successfully"));
   }
-};
+);
 
-/**
- * Retrieves all messages exchanged between the logged-in user and the specified user.
- *
- * - Fetches messages from the conversation between the two users.
- * - Returns an array of messages or an empty array if no messages are found.
- *
- * @param req - userToChatId from params and senderId from user
- * @param res - messages or error response
- */
-export const getMessages = async (
-  req: Request & { user?: { id: string } },
-  res: Response
-): Promise<void> => {
-  try {
+/**  Get Messages Controller **/
+export const getMessages = asyncHandler(
+  async (req: Request & { user?: { id: string } }, res: Response) => {
     const userToChatId = req.params.id;
     const senderId = req.user?.id;
 
-    // Verify sender is authenticated
     if (!senderId) {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
+      throw new ApiError(401, "Unauthorized");
     }
 
     const messages = await messageService.getConversationMessages(
       senderId,
       userToChatId
     );
-    res.status(200).json(messages);
-  } catch (error: any) {
-    console.error("Error in getMessages:", error.message);
-    res.status(500).json({ error: "Internal server error" });
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, messages, "Messages fetched successfully"));
   }
-};
+);

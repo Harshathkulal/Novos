@@ -13,6 +13,7 @@ export const getUser = async () => {
 export const getAllUser = async () => {
   try {
     const allUsers = await api.get("/users/users");
+    console.log(allUsers)
     return allUsers.data;
   } catch (err: any) {
     throw new Error(err?.message || "Failed to fetch users");

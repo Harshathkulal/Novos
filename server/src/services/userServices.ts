@@ -1,32 +1,27 @@
 import { UserDB } from "../repository/mongoDB/userDB";
+import { ApiError } from "../utils/apiError";
 
 const userDB = new UserDB();
 
 export class UserService {
-  /**
-   * Method to get user by ID.
-   * @param userId - The ID of the user to fetch.
-   */
-  async getUserById(userId: string): Promise<any> {
+  /** Get user by ID. Service*/
+  async getUserById(userId: string) {
     const user = await userDB.findById(userId);
     if (!user) {
-      throw new Error("User not found!");
+      throw new ApiError(404, "User not found!");
     }
     return {
-      message: "User fetched successfully!",
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
+        profileImg: user.profileImg,
       },
     };
   }
 
-  /**
-   * Method to get all users except the logged-in user.
-   * @param exceptUserId - The ID of the user to exclude from the list.
-   */
-  async getAllUsers(exceptUserId: string): Promise<any[]> {
+  /** Get all users except the given user ID. Service*/
+  async getAllUsers(exceptUserId: string) {
     const users = await userDB.findAllUsers(exceptUserId);
     return users.map((user) => ({
       id: user.id,

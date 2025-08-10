@@ -1,18 +1,19 @@
 import { MessageRepository } from "../repository/mongoDB/messageDB";
+import { ApiError } from "../utils/apiError";
 
 const messageDB = new MessageRepository();
 
 export class MessageService {
   /**
-   * Method to send a message from one user to another.
-   * @param senderId - The ID of the user sending the message.
-   * @param receiverId - The ID of the user receiving the message.
-   * @param message - The content of the message.
+   * Send a message from sender to receiver.
+   * Throws ApiError on validation failure.
    */
   async sendMessage(senderId: string, receiverId: string, message: string) {
-    if (!message.trim()) throw new Error("Message is required");
+    if (!message.trim()) {
+      throw new ApiError(400, "Message is required");
+    }
 
-    // Find or create conversation
+    // Find existing conversation or create new one
     let conversation = await messageDB.findConversationBetweenUsers(
       senderId,
       receiverId
@@ -22,7 +23,7 @@ export class MessageService {
       conversation = await messageDB.createConversation([senderId, receiverId]);
     }
 
-    // Create new message
+    // Create and save new message
     const newMessage = await messageDB.createMessage({
       senderId,
       receiverId,
@@ -30,17 +31,18 @@ export class MessageService {
     });
 
     conversation.messages.push(newMessage.id as any);
+    await conversation.save();
 
-    await Promise.all([conversation.save(), newMessage.save()]);
-
-    return { successful: true };
+    return {
+      messageId: newMessage.id,
+      message: newMessage.message,
+      senderId: newMessage.senderId,
+      createdAt: newMessage.createdAt,
+    };
   }
 
   /**
-   * Method to get all messages exchanged between two users.
-   * @param userId1 - The ID of the first user.
-   * @param userId2 - The ID of the second user.
-   * @returns An array of messages exchanged between the two users.
+   * Get all messages exchanged between two users.
    */
   async getConversationMessages(userId1: string, userId2: string) {
     const conversation = await messageDB.getMessagesForConversation(
@@ -48,14 +50,16 @@ export class MessageService {
       userId2
     );
 
-    const rawMessages = conversation?.messages || [];
-    const formattedMessages = rawMessages.map((msg: any) => ({
+    if (!conversation) {
+      return [];
+    }
+
+    // Format raw messages to simple objects
+    return conversation.messages.map((msg: any) => ({
       id: msg.id,
       message: msg.message,
-      senderId: msg.senderId.id,
+      senderId: msg.senderId.id || msg.senderId,
       createdAt: msg.createdAt,
     }));
-
-    return formattedMessages;
   }
 }

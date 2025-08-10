@@ -1,56 +1,39 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/userServices";
+import { asyncHandler } from "../utils/asyncHandler";
+import { ApiResponse } from "../utils/apiResponse";
+import { ApiError } from "../utils/apiError";
 
 const userService = new UserService();
 
-/**
- * Retrieves the logged-in user's details.
- * @param req - Contains the logged-in user's ID from the request object.
- * @param res - Responds with the user details or an error message.
- */
-export const getUser = async (
-  req: Request & { user?: { id: string } },
-  res: Response
-): Promise<void> => {
-  try {
+/**  Get Logged-in User Controller. **/
+export const getUser = asyncHandler(
+  async (req: Request & { user?: { id: string } }, res: Response) => {
     const user = await userService.getUserById(req.user?.id);
 
     if (!user) {
-      res.status(400).json({ message: "User not found!" });
-      return;
+      throw new ApiError(404, "User not found!");
     }
-    res.status(200).json(user);
-  } catch (error: any) {
-    console.error("failed to fetch User:", error.message);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
 
-/**
- * Retrieves all users except the logged-in user.
- * @param req - Contains the logged-in user's ID from the request object.
- * @param res - Responds with an array of users or an error message.
- */
-export const getAllUsers = async (
-  req: Request & { user?: { id: string } },
-  res: Response
-): Promise<void> => {
-  try {
+    res
+      .status(200)
+      .json(new ApiResponse(200, user, "User fetched successfully"));
+  }
+);
+
+/**  Get All Users Except Logged-in User Controller. **/
+export const getAllUsers = asyncHandler(
+  async (req: Request & { user?: { id: string } }, res: Response) => {
     const loggedInUserId = req.user?.id;
 
     if (!loggedInUserId) {
-      res.status(401).json({ error: "Unauthorized please Log In" });
-      return;
+      throw new ApiError(401, "Unauthorized. Please log in.");
     }
 
     const users = await userService.getAllUsers(loggedInUserId);
 
-    res.status(200).json({
-      message: "Users fetched successfully!",
-      users,
-    });
-  } catch (error: any) {
-    console.error("failed to fetch Users:", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    res
+      .status(200)
+      .json(new ApiResponse(200, users, "Users fetched successfully"));
   }
-};
+);

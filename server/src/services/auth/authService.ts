@@ -1,8 +1,10 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 import { IUserRepository } from "../../repository/UserRepository";
 import { UserDB } from "../../repository/mongoDB/userDB";
-import dotenv from "dotenv";
+import { ApiError } from "../../utils/apiError";
+
 dotenv.config();
 
 interface Register {
@@ -20,37 +22,35 @@ const JWT_SECRET = process.env.JWT_SECRET_KEY!;
 const userRepo: IUserRepository = new UserDB();
 
 export class AuthService {
-  async register({
-    username,
-    email,
-    password,
-  }: Register): Promise<{ message: string }> {
+  /**  Register Service. **/
+  async register({ username, email, password }: Register) {
     const existingEmail = await userRepo.findByEmail(email);
+    if (existingEmail) {
+      throw new ApiError(400, "Email already exists!");
+    }
+
     const existingUsername = await userRepo.findByUsername(username);
-    if (existingEmail || existingUsername) {
-      throw new Error(
-        existingEmail ? "Email already exists!" : "Username already exists!"
-      );
+    if (existingUsername) {
+      throw new ApiError(400, "Username already exists!");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await userRepo.createUser({ username, email, password: hashedPassword });
-    return { message: "User created successfully!" };
+
+    return;
   }
 
-  async login({
-    identifier,
-    password,
-  }: Login): Promise<{ message: string; user: any }> {
+  /**  Login Service. **/
+  async login({ identifier, password }: Login) {
     const user = identifier.includes("@")
       ? await userRepo.findByEmail(identifier)
       : await userRepo.findByUsername(identifier);
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new Error("Invalid credentials!");
+      throw new ApiError(401, "Invalid credentials!");
     }
+
     return {
-      message: "Login successful!",
       user: {
         id: user.id,
         username: user.username,
@@ -59,30 +59,32 @@ export class AuthService {
     };
   }
 
+  /**  Session Service. **/
   async session(token: string) {
+    let decoded: jwt.JwtPayload;
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      let userId: string | undefined;
-      if (typeof decoded === "object" && "userId" in decoded) {
-        userId = (decoded as jwt.JwtPayload).userId as string;
-      }
-      if (!userId) {
-        throw new Error("Invalid token payload!");
-      }
-      const user = await userRepo.findById(userId);
-      if (!user) {
-        throw new Error("User not found!");
-      }
-      return {
-        message: "Token is valid!",
-        user: {
-          id: user.id,
-          fullName: user.fullName,
-          email: user.email,
-        },
-      };
-    } catch (error) {
-      throw new Error("Invalid token!");
+      decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
+    } catch {
+      throw new ApiError(401, "Invalid token!");
     }
+
+    const userId = decoded.userId;
+    if (!userId) {
+      throw new ApiError(400, "Invalid token payload!");
+    }
+
+    const user = await userRepo.findById(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found!");
+    }
+
+    return {
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        profileImg: user.profileImg,
+      },
+    };
   }
 }

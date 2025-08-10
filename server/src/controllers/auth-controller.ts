@@ -1,66 +1,43 @@
 import { Request, Response } from "express";
 import { generateJWT, clearJWT } from "../utils/jwt-utils";
 import { AuthService } from "../services/auth/authService";
+import { asyncHandler } from "../utils/asyncHandler";
+import { ApiResponse } from "../utils/apiResponse";
 
 const authService = new AuthService();
 
-/* * Method to handle errors in the application.
- *  @param res - 500.
- */
-const handleError = (res: Response, error: any) => {
-  console.error("Error:", error);
-  res.status(500).json({ message: "Server Error!" });
-};
+/**  Register Controller. **/
+export const register = asyncHandler(async (req: Request, res: Response) => {
+  const { username, email, password } = req.body;
+  const result = await authService.register({ username, email, password });
 
-/* * Method to Register User.
-    params req - { username, email, password }.
- */
-const register = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { username, email, password } = req.body;
-    const result = await authService.register({ username, email, password });
-    res.status(201).json(result);
-  } catch (error) {
-    handleError(res, error);
-  }
-};
+  res
+    .status(201)
+    .json(new ApiResponse(201, result, "User registered successfully"));
+});
 
-/* * Method to Login User.
- * params req - { username/email, password }.
- */
-const login = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { identifier, password } = req.body;
-    const result = await authService.login({ identifier, password });
-    generateJWT(res, result.user.id as unknown as string);
-    res.status(200).json(result);
-  } catch (error) {
-    handleError(res, error);
-  }
-};
+/**  Login Controller. **/
+export const login = asyncHandler(async (req: Request, res: Response) => {
+  const { identifier, password } = req.body;
+  const result = await authService.login({ identifier, password });
 
-/* * Method to Logout User.
- */
-const logout = async (_req: Request, res: Response): Promise<void> => {
-  try {
-    clearJWT(res);
-    res.status(200).json({ message: "Logout successful!" });
-  } catch (error) {
-    handleError(res, error);
-  }
-};
+  generateJWT(res, result.user.id as unknown as string);
 
-/* * Method to get session.
- * params req - cookies.
- */
-const session = async (req: Request, res: Response) => {
-  try {
-    const token = req.cookies.jwt;
-    const result = await authService.session(token);
-    res.status(200).json(result);
-  } catch (error) {
-    handleError(res, error);
-  }
-};
+  res.status(200).json(new ApiResponse(200, result, "Login successful"));
+});
 
-export { register, login, logout, session };
+/**  Logout Controller. **/
+export const logout = asyncHandler(async (_req: Request, res: Response) => {
+  clearJWT(res);
+  res.status(200).json(new ApiResponse(200, null, "Logout successful"));
+});
+
+/**  Session Controller. **/
+export const session = asyncHandler(async (req: Request, res: Response) => {
+  const token = req.cookies.jwt;
+  const result = await authService.session(token);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, result, "Session fetched successfully"));
+});
