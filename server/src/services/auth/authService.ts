@@ -1,11 +1,12 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyAccessToken,
+} from "../../utils/jwt-utils";
 import { IUserRepository } from "../../repository/UserRepository";
 import { UserDB } from "../../repository/mongoDB/userDB";
 import { ApiError } from "../../utils/apiError";
-
-dotenv.config();
 
 interface Register {
   username: string;
@@ -18,7 +19,6 @@ interface Login {
   password: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET_KEY!;
 const userRepo: IUserRepository = new UserDB();
 
 export class AuthService {
@@ -50,20 +50,27 @@ export class AuthService {
       throw new ApiError(401, "Invalid credentials!");
     }
 
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
+
     return {
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
       },
+      tokens: {
+        accessToken,
+        refreshToken,
+      },
     };
   }
 
   /**  Session Service. **/
   async session(token: string) {
-    let decoded: jwt.JwtPayload;
+    let decoded;
     try {
-      decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
+      decoded = verifyAccessToken(token);
     } catch {
       throw new ApiError(401, "Invalid token!");
     }

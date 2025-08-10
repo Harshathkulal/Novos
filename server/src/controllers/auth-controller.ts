@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { generateJWT, clearJWT } from "../utils/jwt-utils";
+import { setTokensCookies, clearTokensCookies } from "../utils/jwt-utils";
 import { AuthService } from "../services/auth/authService";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiResponse } from "../utils/apiResponse";
@@ -21,14 +21,14 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const { identifier, password } = req.body;
   const result = await authService.login({ identifier, password });
 
-  generateJWT(res, result.user.id as unknown as string);
+  setTokensCookies(res, result.tokens.accessToken, result.tokens.refreshToken);
 
   res.status(200).json(new ApiResponse(200, result, "Login successful"));
 });
 
 /**  Logout Controller. **/
 export const logout = asyncHandler(async (_req: Request, res: Response) => {
-  clearJWT(res);
+  clearTokensCookies(res);
   res.status(200).json(new ApiResponse(200, null, "Logout successful"));
 });
 
