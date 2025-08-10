@@ -7,17 +7,7 @@ import {
 import { IUserRepository } from "../../repository/UserRepository";
 import { UserDB } from "../../repository/mongoDB/userDB";
 import { ApiError } from "../../utils/apiError";
-
-interface Register {
-  username: string;
-  email: string;
-  password: string;
-}
-
-interface Login {
-  identifier: string;
-  password: string;
-}
+import { Register, Login } from "../../types/service.types";
 
 const userRepo: IUserRepository = new UserDB();
 

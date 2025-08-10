@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { UserDB } from "../repository/mongoDB/userDB";
 import { ApiError } from "../utils/apiError";
+import { verifyAccessToken } from "../utils/jwt-utils";
 
 declare global {
   namespace Express {
@@ -12,7 +13,6 @@ declare global {
 }
 
 const userDB = new UserDB();
-const JWT_SECRET = process.env.JWT_SECRET_KEY!;
 
 export const protectRoute = async (
   req: Request,
@@ -20,12 +20,14 @@ export const protectRoute = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const token = req.cookies.jwt;
+    const token =
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace("Bearer ", "");
     if (!token) {
       return next(new ApiError(401, "Not authorized, no token"));
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+    const decoded = verifyAccessToken(token);
     if (!decoded?.userId) {
       return next(new ApiError(401, "Not authorized, invalid token"));
     }
