@@ -4,12 +4,11 @@ import {
   generateRefreshToken,
   verifyAccessToken,
 } from "../../utils/jwt-utils";
-import { IUserRepository } from "../../repository/UserRepository";
-import { UserDB } from "../../repository/mongoDB/userDB";
+import { RepositoryRepo } from "../../repository/registry";
 import { ApiError } from "../../utils/apiError";
 import { Register, Login } from "../../types/service.types";
 
-const userRepo: IUserRepository = new UserDB();
+const { userRepo } = RepositoryRepo();
 
 export class AuthService {
   /**  Register Service. **/

@@ -1,6 +1,7 @@
 import User from "../../models/user-modal";
+import { IUserRepository } from "../../types/repository";
 
-export class UserDB {
+export class MongoUserDB implements IUserRepository {
   async findAllUsers(userId: string) {
     const users = await User.find({ _id: { $ne: userId } }).select("-password");
     return users.map((user: any) => ({

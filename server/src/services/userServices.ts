@@ -1,12 +1,12 @@
-import { UserDB } from "../repository/mongoDB/userDB";
+import { RepositoryRepo } from "../repository/registry";
 import { ApiError } from "../utils/apiError";
 
-const userDB = new UserDB();
+const { userRepo } = RepositoryRepo();
 
 export class UserService {
   /** Get user by ID. Service*/
   async getUserById(userId: string) {
-    const user = await userDB.findById(userId);
+    const user = await userRepo.findById(userId);
     if (!user) {
       throw new ApiError(404, "User not found!");
     }
@@ -22,7 +22,7 @@ export class UserService {
 
   /** Get all users except the given user ID. Service*/
   async getAllUsers(exceptUserId: string) {
-    const users = await userDB.findAllUsers(exceptUserId);
+    const users = await userRepo.findAllUsers(exceptUserId);
     return users.map((user) => ({
       id: user.id,
       username: user.username,

@@ -1,16 +1,16 @@
-import mongoose from "mongoose";
+import { connectMongoDB } from "./mongoDB";
+import { connectPostgres } from "./PostgresDB";
 
 const connectDB = async () => {
-  try {
-    const URI = process.env.MONGO_URI;
-    if (!URI) {
-      throw new Error("MONGO_URI environment is undefined");
-    }
-    await mongoose.connect(URI);
-    console.log("MongoDB Connected!");
-  } catch (error) {
-    console.log("MongoDB Error: ", error);
-    process.exit(1);
+  const DB_TYPE = process.env.DB_TYPE || "mongo";
+
+  if (DB_TYPE === "mongo" || DB_TYPE === "both") {
+    await connectMongoDB();
+  }
+
+  if (DB_TYPE === "postgres" || DB_TYPE === "both") {
+    await connectPostgres();
   }
 };
+
 export default connectDB;

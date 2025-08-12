@@ -1,7 +1,8 @@
 import Message from "../../models/message-modal";
 import Conversation from "../../models/conversation-modal";
+import { IMessageRepository } from "../../types/repository";
 
-export class MessageRepository {
+export class MongoMessageDB implements IMessageRepository {
   async createMessage(data: {
     senderId: string;
     receiverId: string;

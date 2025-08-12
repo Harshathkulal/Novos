@@ -1,7 +1,7 @@
-import { MessageRepository } from "../repository/mongoDB/messageDB";
+import { RepositoryRepo } from "../repository/registry";
 import { ApiError } from "../utils/apiError";
 
-const messageDB = new MessageRepository();
+const { messageRepo } = RepositoryRepo();
 
 export class MessageService {
   /**
@@ -14,17 +14,17 @@ export class MessageService {
     }
 
     // Find existing conversation or create new one
-    let conversation = await messageDB.findConversationBetweenUsers(
+    let conversation = await messageRepo.findConversationBetweenUsers(
       senderId,
       receiverId
     );
 
     if (!conversation) {
-      conversation = await messageDB.createConversation([senderId, receiverId]);
+      conversation = await messageRepo.createConversation([senderId, receiverId]);
     }
 
     // Create and save new message
-    const newMessage = await messageDB.createMessage({
+    const newMessage = await messageRepo.createMessage({
       senderId,
       receiverId,
       message,
@@ -45,7 +45,7 @@ export class MessageService {
    * Get all messages exchanged between two users.
    */
   async getConversationMessages(userId1: string, userId2: string) {
-    const conversation = await messageDB.getMessagesForConversation(
+    const conversation = await messageRepo.getMessagesForConversation(
       userId1,
       userId2
     );
