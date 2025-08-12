@@ -7,82 +7,86 @@ export class PostgresMessageDB implements IMessageRepository {
     receiverId: string;
     message: string;
   }) {
-    const result = await pool.query(
-      `INSERT INTO messages (sender_id, receiver_id, message)
-       VALUES ($1, $2, $3)
-       RETURNING id, sender_id, receiver_id, message, created_at`,
-      [data.senderId, data.receiverId, data.message]
+    // 1. Find conversation between users (or create one)
+    let conversation = await this.findConversationBetweenUsers(
+      data.senderId,
+      data.receiverId
     );
+
+    if (!conversation) {
+      conversation = await this.createConversation([
+        data.senderId,
+        data.receiverId,
+      ]);
+    }
+
+    const result = await pool.query(
+      `INSERT INTO messages (conversation_id, sender_id, receiver_id, message)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [conversation.id, data.senderId, data.receiverId, data.message]
+    );
+
     return result.rows[0];
   }
 
   async findMessageById(id: string) {
-    const result = await pool.query(
-      `SELECT id, sender_id, receiver_id, message, created_at
-       FROM messages
-       WHERE id = $1`,
-      [id]
-    );
+    const result = await pool.query(`SELECT * FROM messages WHERE id = $1`, [
+      id,
+    ]);
     return result.rows[0] || null;
   }
 
   async findConversationBetweenUsers(user1: string, user2: string) {
     const result = await pool.query(
-      `SELECT *
-       FROM conversations
-       WHERE participants @> ARRAY[$1, $2]::uuid[] 
-         AND participants <@ ARRAY[$1, $2]::uuid[]`,
-      [user1, user2]
+      `
+    SELECT c.*
+    FROM conversations c
+    JOIN conversation_participants cp ON cp.conversation_id = c.id
+    WHERE cp.user_id IN ($1, $2)
+    GROUP BY c.id
+    HAVING COUNT(DISTINCT cp.user_id) = 2
+    `,
+      [user1, user2].map(Number)
     );
+
     return result.rows[0] || null;
   }
 
   async createConversation(participants: string[]) {
-    const result = await pool.query(
-      `INSERT INTO conversations (participants)
-       VALUES ($1)
-       RETURNING *`,
-      [participants]
+    const convoRes = await pool.query(
+      `INSERT INTO conversations DEFAULT VALUES RETURNING *`
     );
-    return result.rows[0];
+    const convo = convoRes.rows[0];
+
+    for (const userId of participants) {
+      await pool.query(
+        `INSERT INTO conversation_participants (conversation_id, user_id)
+         VALUES ($1, $2)`,
+        [convo.id, userId]
+      );
+    }
+
+    return convo;
   }
 
-  async addMessageToConversation(conversationId: string, messageId: string) {
-    const result = await pool.query(
-      `UPDATE conversations
-       SET messages = array_append(messages, $2)
-       WHERE id = $1
-       RETURNING *`,
-      [conversationId, messageId]
-    );
-    return result.rows[0];
+  async addMessageToConversation() {
+    // Not needed in relational schema — handled via `conversation_id` in `messages`
   }
 
   async getMessagesForConversation(user1: string, user2: string) {
-    // Get conversation
-    const convoResult = await pool.query(
-      `SELECT messages
-       FROM conversations
-       WHERE participants @> ARRAY[$1, $2]::uuid[] 
-         AND participants <@ ARRAY[$1, $2]::uuid[]`,
-      [user1, user2]
-    );
+    const conversation = await this.findConversationBetweenUsers(user1, user2);
+    if (!conversation) return { messages: [] };
 
-    const convo = convoResult.rows[0];
-    if (!convo || !convo.messages || convo.messages.length === 0) {
-      return { messages: [] };
-    }
-
-    // Get message details
-    const msgResult = await pool.query(
+    const messagesRes = await pool.query(
       `SELECT id, message, sender_id, created_at
        FROM messages
-       WHERE id = ANY($1::int[])
+       WHERE conversation_id = $1
        ORDER BY created_at ASC`,
-      [convo.messages]
+      [conversation.id]
     );
 
-    const messages = msgResult.rows.map((msg: any) => ({
+    const messages = messagesRes.rows.map((msg: any) => ({
       id: msg.id.toString(),
       message: msg.message,
       senderId: { id: msg.sender_id.toString() },

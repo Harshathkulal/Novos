@@ -11,14 +11,16 @@ CREATE TABLE users (
 
 CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
+  conversation_id INTEGER,
   sender_id INTEGER NOT NULL,
   receiver_id INTEGER NOT NULL,
   message TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-  CONSTRAINT fk_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
-  CONSTRAINT fk_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+  
+  FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
+  FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE conversations (
@@ -35,14 +37,4 @@ CREATE TABLE conversation_participants (
   FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
-CREATE TABLE conversation_messages (
-  conversation_id INTEGER NOT NULL,
-  message_id INTEGER NOT NULL,
-
-  PRIMARY KEY (conversation_id, message_id),
-  FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
-  FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
-);
-
 

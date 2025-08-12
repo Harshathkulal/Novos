@@ -13,33 +13,19 @@ export class MessageService {
       throw new ApiError(400, "Message is required");
     }
 
-    // Find existing conversation or create new one
-    let conversation = await messageRepo.findConversationBetweenUsers(
-      senderId,
-      receiverId
-    );
+  const newMessage = await messageRepo.createMessage({
+    senderId,
+    receiverId,
+    message,
+  });
 
-    if (!conversation) {
-      conversation = await messageRepo.createConversation([senderId, receiverId]);
-    }
-
-    // Create and save new message
-    const newMessage = await messageRepo.createMessage({
-      senderId,
-      receiverId,
-      message,
-    });
-
-    conversation.messages.push(newMessage.id as any);
-    await conversation.save();
-
-    return {
-      messageId: newMessage.id,
-      message: newMessage.message,
-      senderId: newMessage.senderId,
-      createdAt: newMessage.createdAt,
-    };
-  }
+  return {
+    messageId: newMessage.id || newMessage._id?.toString(),
+    message: newMessage.message,
+    senderId: newMessage.senderId || newMessage.sender_id,
+    createdAt: newMessage.createdAt || newMessage.created_at,
+  };
+}
 
   /**
    * Get all messages exchanged between two users.
