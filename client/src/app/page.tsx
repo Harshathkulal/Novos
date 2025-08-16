@@ -1,10 +1,43 @@
-"use client";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
-
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      Hello
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
+      <section className="text-center max-w-2xl">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+          Chat. Connect. Scale.
+        </h1>
+        <p className="mt-4 text-muted-foreground text-lg">
+          Building minimal, chat experience.
+        </p>
+
+        <div className="mt-6 flex justify-center gap-4">
+          <Link href="/chat">
+            <Button size="lg">Start Chatting</Button>
+          </Link>
+          <Link href="/login">
+            <Button size="lg" variant="outline">
+              Login
+            </Button>
+          </Link>
+        </div>
+
+        <form className="mt-8 flex w-full max-w-md items-center gap-2 mx-auto">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            required
+            className="flex-1"
+          />
+          <Button type="submit">Join Waitlist</Button>
+        </form>
+      </section>
+
+      <footer className="mt-20 text-center text-sm text-muted-foreground">
+        © {2025} Novos, Inc
+      </footer>
+    </main>
   );
 }
