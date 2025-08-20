@@ -47,7 +47,7 @@ export class PostgresMessageDB implements IMessageRepository {
     GROUP BY c.id
     HAVING COUNT(DISTINCT cp.user_id) = 2
     `,
-      [user1, user2].map(Number)
+      [user1, user2]
     );
 
     return result.rows[0] || null;
