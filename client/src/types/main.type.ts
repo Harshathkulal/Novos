@@ -4,4 +4,5 @@ export interface AuthContextType {
   error: string | null;
   setUserId: (userId: string | null) => void;
   refetch: () => Promise<void>;
+  userName: string | null;
 }

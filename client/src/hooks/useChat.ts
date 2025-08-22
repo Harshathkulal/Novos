@@ -83,7 +83,7 @@ export const useChat = () => {
 
     setMessages((prev) => [
       ...prev,
-      { senderId: userId as string, receiverId: receiver.id, message: input },
+      { senderId: userId as string, receiverId: receiver.id, message: input, createdAt: new Date().toString() }
     ]);
 
     setInput("");

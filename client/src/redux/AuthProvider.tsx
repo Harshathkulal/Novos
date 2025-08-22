@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { getUser } from "@/services/userService";
 import { AuthContextType } from "@/types/main.type";
 import { Loader } from "lucide-react";
@@ -11,10 +17,12 @@ const AuthContext = createContext<AuthContextType>({
   error: null,
   setUserId: () => {},
   refetch: async () => {},
+  userName: null,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,6 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const res = await getUser();
       setUserId(res.id);
+      setUserName(res.username)
       setError(null);
     } catch {
       setUserId(null);
@@ -46,7 +55,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ userId, loading, error, refetch: fetchUser, setUserId }}>
+    <AuthContext.Provider
+      value={{ userId, loading, error, refetch: fetchUser, setUserId, userName }}
+    >
       {children}
     </AuthContext.Provider>
   );

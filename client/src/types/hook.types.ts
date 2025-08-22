@@ -8,4 +8,5 @@ export interface Message {
   senderId: string;
   receiverId: string;
   message: string;
+  createdAt?: string;
 }

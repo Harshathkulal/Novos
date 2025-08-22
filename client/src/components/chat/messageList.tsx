@@ -1,3 +1,4 @@
+import MessageBubble from "@/components/chat/MessageBubble";
 import { MessageListProps } from "@/types/chat.types";
 
 export default function MessageList({
@@ -8,16 +9,7 @@ export default function MessageList({
   return (
     <div className="flex flex-col flex-1 overflow-y-auto space-y-2 mb-4">
       {messages.map((msg, idx) => (
-        <div
-          key={idx}
-          className={`max-w-xs p-2 rounded ${
-            msg.senderId === userId
-              ? "bg-primary text-white self-end"
-              : "bg-gray-200 self-start"
-          }`}
-        >
-          {msg.message}
-        </div>
+        <MessageBubble key={idx} message={msg} fromMe={msg.senderId === userId} />
       ))}
       <div ref={messagesEndRef} />
     </div>

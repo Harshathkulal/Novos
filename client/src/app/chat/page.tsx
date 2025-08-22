@@ -19,7 +19,7 @@ export default function Chat() {
     userId,
   } = useChat();
 
-  const { userId: authUserId, loading } = useAuth();
+  const { userId: authUserId, loading, userName } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function Chat() {
           receiver ? "hidden" : "block"
         } md:block`}
       >
-        <UserList users={users} onSelect={setReceiver} />
+        <UserList userName={userName} users={users} onSelect={setReceiver} />
       </div>
 
       <div

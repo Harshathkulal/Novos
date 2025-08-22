@@ -5,6 +5,7 @@ interface Message {
   senderId: string;
   receiverId: string;
   message: string;
+  createdAt?: string;
 }
 
 export interface MessageListProps {
@@ -23,6 +24,7 @@ interface Message {
   senderId: string;
   receiverId: string;
   message: string;
+  createdAt?: string;
 }
 
 export interface ChatWindowProps {
@@ -40,9 +42,11 @@ export interface ChatWindowProps {
 interface User {
   id: string;
   username: string;
+  profileimg?: string;
 }
 
 export interface UserListProps {
+  userName: string | null;
   users: User[];
   onSelect: (user: User) => void;
 }
