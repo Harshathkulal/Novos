@@ -7,15 +7,15 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <section className="text-center max-w-2xl">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Chat. Connect. Scale.
+          Scroll. Connect. Scale.
         </h1>
         <p className="mt-4 text-muted-foreground text-lg">
-          Building minimal, chat experience.
+          Building minimal, Social experiences.
         </p>
 
         <div className="mt-6 flex justify-center gap-4">
           <Link href="/chat">
-            <Button size="lg">Start Chatting</Button>
+            <Button size="lg">Chat</Button>
           </Link>
           <Link href="/login">
             <Button size="lg" variant="outline">
