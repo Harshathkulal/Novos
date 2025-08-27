@@ -1,103 +1,80 @@
-"use client";
-
-import { useEffect, useState, useRef } from "react";
-import {
-  initiateSocket,
-  sendMessage as sendSocketMessage,
-  subscribeToMessages,
-  disconnectSocket,
-} from "@/lib/socket";
-import { getAllUser } from "@/services/userService";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState, AppDispatch } from "@/redux/store";
+import { useState } from "react";
+import { setMessages, addMessage, setInput } from "@/redux/slices/chatSlice";
+import { sendMessage as sendSocketMessage } from "@/lib/socket";
 import { getMessage, sendMessage } from "@/services/messageService";
 import { toast } from "sonner";
-import { useAuth } from "@/redux/AuthProvider";
-import { User, Message } from "@/types/hook.types";
+import { useParams } from "react-router-dom";
 
 export const useChat = () => {
-  const { userId } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [receiver, setReceiver] = useState<User | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const { userInfo } = useSelector((state: RootState) => state.user);
+  const { users, messages, input } = useSelector(
+    (state: RootState) => state.chat
+  );
+  console.log(users,messages,input)
 
+  const { userId: selectedUserId } = useParams();
+  const userId = userInfo?.id;
+  const [messageLoading, setMessageLoading] = useState(false);
+
+  // Fetch messages only when chat user changes
   useEffect(() => {
-    if (!userId) return;
-    const fetchUsers = async () => {
-      try {
-        const res = await getAllUser();
-        setUsers(res.data);
-      } catch {
-        toast.error("Failed to fetch users.");
-      }
-    };
+    if (!selectedUserId) {
+      dispatch(setMessages([]));
+      return;
+    }
 
-    fetchUsers();
-  }, [userId]);
-
-  useEffect(() => {
-    if (!userId) return;
-
-    initiateSocket(userId);
-    subscribeToMessages((message) => {
-      setMessages((prev) => [...prev, message]);
-    });
-
-    return () => {
-      disconnectSocket();
-    };
-  }, [userId]);
-
-  useEffect(() => {
     const fetchMessages = async () => {
-      if (!receiver) {
-        setMessages([]);
-        return;
-      }
-
+      setMessageLoading(true);
       try {
-        const res = await getMessage(receiver.id);
-        setMessages(res.data);
+        const res = await getMessage(selectedUserId);
+        dispatch(setMessages(res.data));
       } catch {
         toast.error("Failed to fetch messages.");
+      } finally {
+        setMessageLoading(false);
       }
     };
 
     fetchMessages();
-  }, [receiver]);
+  }, [selectedUserId, dispatch]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
+  // Send message
   const handleSend = async () => {
-    if (!input.trim() || !receiver) return;
+    if (!input.trim() || !selectedUserId) return;
 
-    sendSocketMessage(input, receiver.id);
-
+    sendSocketMessage(input, selectedUserId);
     try {
-      await sendMessage(receiver.id, input);
+      await sendMessage(selectedUserId, input);
     } catch (err) {
       console.error("Failed to save message", err);
     }
 
-    setMessages((prev) => [
-      ...prev,
-      { senderId: userId as string, receiverId: receiver.id, message: input, createdAt: new Date().toString() }
-    ]);
+    dispatch(
+      addMessage({
+        senderId: userId!,
+        receiverId: selectedUserId,
+        message: input,
+        createdAt: new Date().toString(),
+      })
+    );
 
-    setInput("");
+    dispatch(setInput(""));
   };
 
+  // Get receiver directly from Redux users
+  const receiver = users.find((u) => u.id === selectedUserId);
+
   return {
-    users,
     receiver,
-    setReceiver,
     messages,
     input,
-    setInput,
+    setInput: (val: string) => dispatch(setInput(val)),
     handleSend,
-    messagesEndRef,
     userId,
+    messageLoading,
   };
 };

@@ -1,14 +1,12 @@
-"use client";
-
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { UserListProps } from "@/types/chat.types";
+import { useNavigate } from "react-router-dom";
+import type { UserListProps } from "@/types/chat.types";
 import { Settings, ArrowLeft, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function UserList({ users, userName }: UserListProps) {
   const [search, setSearch] = useState("");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const filteredUsers = users?.filter((user) =>
     user.username.toLowerCase().includes(search.toLowerCase())
@@ -16,17 +14,16 @@ export default function UserList({ users, userName }: UserListProps) {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
+      {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
-        <button
-          onClick={() => router.push("/")}
-          className="mr-2 cursor-pointer"
-        >
+        <button onClick={() => navigate("/")} className="mr-2 cursor-pointer">
           <ArrowLeft size={20} />
         </button>
         <h2 className="text-lg font-semibold truncate">{userName}</h2>
         <Settings size={18} className="cursor-pointer" />
       </div>
 
+      {/* Search */}
       <div className="p-2">
         <div className="relative">
           <Search
@@ -43,13 +40,14 @@ export default function UserList({ users, userName }: UserListProps) {
         </div>
       </div>
 
+      {/* User list */}
       <div className="flex-1 overflow-y-auto px-4 pb-4">
         {filteredUsers?.length ? (
           filteredUsers.map((user) => (
             <button
               key={user.id}
-              className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-primary-foreground cursor-pointer transition-colors"
-              onClick={() => router.push(`/chat/${user.id}`)}
+              className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-secondary transition-colors"
+              onClick={() => navigate(`/chat/${user.id}`)}
             >
               <Avatar>
                 <AvatarImage src={user.profileimg} />

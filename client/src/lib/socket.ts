@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 let socket: Socket | undefined;
 
 export const initiateSocket = (userId: string | null) => {
-  socket = io(process.env.NEXT_PUBLIC_WEBSOCKET_URL!, {
+  socket = io(import.meta.env.VITE_PUBLIC_WEBSOCKET_URL!, {
     query: { userId },
   });
 

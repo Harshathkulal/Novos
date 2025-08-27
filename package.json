@@ -6,10 +6,11 @@
   "scripts": {
     "dev:client": "npm run --prefix client dev",
     "dev:server": "npm run --prefix server dev",
+    "dev:apps": "npm run --prefix apps/novos dev",
     "build:client": "npm run --prefix client build",
     "start:client": "npm start --prefix client",
     "start:server": "npm start --prefix server",
-    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\" \"npm:dev:apps\"",
     "start": "concurrently \"npm:start:server\" \"npm:start:client\"",
     "postinstall": "npm install --prefix client && npm install --prefix server"
   },

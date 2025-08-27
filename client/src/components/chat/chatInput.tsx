@@ -1,5 +1,5 @@
 import { SendHorizonal } from "lucide-react";
-import { ChatInputProps } from "@/types/chat.types";
+import type { ChatInputProps } from "@/types/chat.types";
 
 export default function ChatInput({ input, setInput, onSend }: ChatInputProps) {
   const isInputEmpty = input.trim() === "";

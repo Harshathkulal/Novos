@@ -7,7 +7,10 @@ export const loginUser = async (email: string, password: string) => {
       identifier: email,
       password,
     });
-    sessionStorage.setItem("accessToken", response.data.data.tokens.accessToken);
+    sessionStorage.setItem(
+      "accessToken",
+      response.data.data.tokens.accessToken
+    );
     return response.data.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Login failed");
@@ -35,7 +38,10 @@ export const registerUser = async (
 export const refreshSession = async () => {
   try {
     const response = await api.post("/auth/refresh", {});
-    sessionStorage.setItem("accessToken", response.data.data.tokens.accessToken);
+    sessionStorage.setItem(
+      "accessToken",
+      response.data.data.tokens.accessToken
+    );
     return response.data.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Session refresh failed");
