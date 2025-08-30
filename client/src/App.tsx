@@ -7,6 +7,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Chat from "@/components/chat/Chat";
 import ChatPage from "@/components/chat/ChatPage";
 import ChatWithUserPage from "@/components/chat/ChatWithUserPage";
+import Thread from "@/components/thread/Thread";
 
 function App() {
   return (
@@ -27,6 +28,15 @@ function App() {
           <Route index element={<ChatPage />} />
           <Route path=":userId" element={<ChatWithUserPage />} />
         </Route>
+
+        <Route
+          path="/thread"
+          element={
+            <ProtectedRoute>
+              <Thread />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
