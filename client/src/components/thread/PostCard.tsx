@@ -11,6 +11,7 @@ import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { EngagementButtons } from "./EngagementButtons";
 import { updatePostApi, deletePostApi } from "@/services/threadService";
 import type { PostCardProps } from "@/types/thread.types";
+import {capitalizeLetter} from "@/utils/Utils"
 
 export const PostCard: React.FC<PostCardProps> = ({
   post,
@@ -27,10 +28,8 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   const handleDelete = async () => {
-    if (confirm("Delete this post?")) {
-      await deletePostApi(post.id);
-      removePost(post.id);
-    }
+    await deletePostApi(post.id);
+    removePost(post.id);
   };
 
   return (
@@ -39,14 +38,14 @@ export const PostCard: React.FC<PostCardProps> = ({
         {/* Avatar + Author */}
         <div className="flex space-x-3 w-full">
           <Avatar>
-            <AvatarImage src={post.author.avatar} alt={post.author.name} />
-            <AvatarFallback>{post.author.name[0]}</AvatarFallback>
+            <AvatarImage src={post.author.avatar} alt={post.author.username} />
+            <AvatarFallback>{capitalizeLetter(post.author.username[0])}</AvatarFallback>
           </Avatar>
           <div className="w-full">
             <div className="flex items-center space-x-2 font-semibold">
-              <span>{post.author.name}</span>
-              <span className="text-muted-foreground">
-                {post.author.username}
+              <span>{capitalizeLetter(post.author.username)}</span>
+              <span className="text-muted-foreground text-xs">
+                @{post.author.username}
               </span>
             </div>
             {editing ? (

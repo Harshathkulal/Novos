@@ -6,19 +6,17 @@ import type { PostFormProps } from "@/types/thread.types";
 
 export const PostForm: React.FC<PostFormProps> = ({ addPost }) => {
   const [content, setContent] = useState("");
-  const [image, setImage] = useState<File | null>(null);
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
 
-    const post = await createPost({ content, image });
+    const post = await createPost({ content });
     addPost(post);
     setContent("");
-    setImage(null);
   };
 
   return (
-    <div className="p-4 sticky top-0 bg-background z-10">
+    <div className="p-4 sticky top-0 bg-background z-10 border-b">
       <Textarea
         placeholder="What's happening?"
         value={content}
