@@ -14,36 +14,15 @@ export class ThreadService {
       image,
     });
 
-    return {
-      id: newThread._id?.toString(),
-      content: newThread.content,
-      createdAt: newThread.createdAt,
-    };
+    return this.formatThread(newThread, authorId);
   }
 
   /** Get all threads (feed) */
   async getThreads(requestingUserId?: string) {
     const threads = await threadRepo.getAllThreads();
-
-    // On fetch, return full formatted data
-    return threads.map((thread: any) => ({
-      id: thread._id?.toString(),
-      content: thread.content,
-      image: thread.image || null,
-      createdAt: thread.createdAt,
-      author: {
-        id: thread.author?._id?.toString(),
-        name: thread.author?.name || "Unknown",
-        username: `@${thread.author?.username || "user"}`,
-        avatar: thread.author?.avatar || null,
-      },
-      likes: thread.likes?.length || 0,
-      comments: thread.comments?.length || 0,
-      shares: thread.shares?.length || 0,
-      isLiked: requestingUserId
-        ? thread.likes?.some((id: any) => id.toString() === requestingUserId)
-        : false,
-    }));
+    return threads.map((thread: any) =>
+      this.formatThread(thread, requestingUserId)
+    );
   }
 
   /** Update a thread */
@@ -53,11 +32,7 @@ export class ThreadService {
     const updated = await threadRepo.updateThread(threadId, userId, content);
     if (!updated) throw new ApiError(404, "Thread not found or unauthorized");
 
-    return {
-      id: updated._id?.toString(),
-      content: updated.content,
-      updatedAt: updated.updatedAt,
-    };
+    return this.formatThread(updated, userId);
   }
 
   /** Delete a thread */
@@ -73,10 +48,29 @@ export class ThreadService {
     const thread = await threadRepo.toggleLike(threadId, userId);
     if (!thread) throw new ApiError(404, "Thread not found");
 
+    return this.formatThread(thread, userId);
+  }
+
+  /** Private helper to normalize thread object */
+  private formatThread(thread: any, requestingUserId?: string) {
     return {
       id: thread._id?.toString(),
+      content: thread.content,
+      image: thread.image || null,
+      createdAt: thread.createdAt,
+      updatedAt: thread.updatedAt,
+      author: {
+        id: thread.author?._id?.toString(),
+        name: thread.author?.name || "Unknown",
+        username: `${thread.author?.username || "user"}`,
+        avatar: thread.author?.avatar || null,
+      },
       likes: thread.likes?.length || 0,
-      isLiked: thread.likes?.some((id: any) => id.toString() === userId),
+      comments: thread.comments?.length || 0,
+      shares: thread.shares?.length || 0,
+      isLiked: requestingUserId
+        ? thread.likes?.some((id: any) => id.toString() === requestingUserId)
+        : false,
     };
   }
 }
