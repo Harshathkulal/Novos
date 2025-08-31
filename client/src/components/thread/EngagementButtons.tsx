@@ -11,7 +11,6 @@ export const EngagementButtons: React.FC<EngagementProps> = ({
     const updated = await likePostApi(post.id);
     updatePost(updated);
   };
-  console.log(post.isLiked)
 
   return (
     <div className="flex space-x-6 mt-3 text-muted-foreground ml-9">

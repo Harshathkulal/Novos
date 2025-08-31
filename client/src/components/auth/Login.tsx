@@ -29,7 +29,7 @@ export default function LoginPage() {
 
     try {
       const data = await loginUser(form.email, form.password);
-      dispatch(login(data.user));
+      dispatch(login({ ...data.user, token: data.tokens.accessToken }));
       setForm({ email: "", password: "" });
 
       navigate("/");
