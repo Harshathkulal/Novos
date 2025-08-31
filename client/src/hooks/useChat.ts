@@ -14,7 +14,6 @@ export const useChat = () => {
   const { users, messages, input } = useSelector(
     (state: RootState) => state.chat
   );
-  console.log(users,messages,input)
 
   const { userId: selectedUserId } = useParams();
   const userId = userInfo?.id;

@@ -18,18 +18,14 @@ export const PostForm: React.FC<PostFormProps> = ({ addPost }) => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 sticky top-0 bg-background z-10">
       <Textarea
         placeholder="What's happening?"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         className="mb-2"
       />
-      <div className="flex justify-between items-center">
-        <Button
-          variant="ghost"
-          onClick={() => console.log("Upload image")}
-        ></Button>
+      <div className="flex justify-end items-center">
         <Button onClick={handleSubmit} disabled={!content.trim()}>
           Post
         </Button>

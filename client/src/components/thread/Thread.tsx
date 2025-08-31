@@ -34,6 +34,36 @@ export default function Thread() {
     comments: 23,
     shares: 12,
     isLiked: true
+  },
+  {
+    id: 3,
+    author: {
+      name: "John Doe",
+      username: "@johndoe",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
+    },
+    content: "Just finished building an amazing React app! The new hooks are incredible 🚀",
+    image: null,
+    timestamp: "2h",
+    likes: 24,
+    comments: 8,
+    shares: 3,
+    isLiked: false
+  },
+  {
+    id: 4,
+    author: {
+      name: "Sarah Wilson",
+      username: "@sarahwilson",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
+    },
+    content: "Beautiful sunset today! Nature never fails to amaze me ✨",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=300&fit=crop",
+    timestamp: "4h",
+    likes: 156,
+    comments: 23,
+    shares: 12,
+    isLiked: true
   }
 ]);
 

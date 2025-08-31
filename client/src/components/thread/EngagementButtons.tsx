@@ -13,12 +13,12 @@ export const EngagementButtons: React.FC<EngagementProps> = ({
   };
 
   return (
-    <div className="flex space-x-4 mt-3 text-muted-foreground ml-9">
+    <div className="flex space-x-6 mt-3 text-muted-foreground ml-9">
       <button
         onClick={handleLike}
         className="flex items-center transition-colors group hover:text-red-500"
       >
-        <div className="p-2 rounded-full cursor-pointer transition-colors">
+        <div className="p-1 rounded-full cursor-pointer transition-colors">
           <Heart
             size={18}
             className={post.isLiked ? "fill-red-500 text-red-500" : ""}
@@ -27,15 +27,15 @@ export const EngagementButtons: React.FC<EngagementProps> = ({
         <span className="text-sm">{post.likes}</span>
       </button>
 
-      <button className="flex items-center space-x-2 transition-colors group hover:text-blue-500">
-        <div className="p-2 rounded-full cursor-pointer transition-colors">
+      <button className="flex items-center transition-colors group hover:text-blue-500">
+        <div className="p-1 rounded-full cursor-pointer transition-colors">
           <MessageCircle size={18} />
         </div>
         <span className="text-sm">{post.comments}</span>
       </button>
 
-      <button className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors group">
-        <div className="p-2 rounded-full cursor-pointer transition-colors">
+      <button className="flex items-center  hover:text-green-500 transition-colors group">
+        <div className="p-1 rounded-full cursor-pointer transition-colors">
           <Share size={18} />
         </div>
         <span className="text-sm">{post.shares}</span>

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Home from "@/pages/home";
 import Login from "@/components/auth/Login";
 import Signup from "@/components/auth/Signup";
@@ -8,10 +8,24 @@ import Chat from "@/components/chat/Chat";
 import ChatPage from "@/components/chat/ChatPage";
 import ChatWithUserPage from "@/components/chat/ChatWithUserPage";
 import Thread from "@/components/thread/Thread";
+import BottomNav from "@/components/BottomNav";
 
 function App() {
   return (
     <BrowserRouter>
+      <MainLayout />
+    </BrowserRouter>
+  );
+}
+
+function MainLayout() {
+  const location = useLocation();
+
+  const showBottomNav =
+    location.pathname === "/" || location.pathname.startsWith("/thread");
+
+  return (
+    <div className="min-h-screen">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -38,7 +52,9 @@ function App() {
           }
         />
       </Routes>
-    </BrowserRouter>
+
+      {showBottomNav && <BottomNav />}
+    </div>
   );
 }
 
