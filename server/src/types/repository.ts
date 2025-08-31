@@ -29,3 +29,23 @@ export interface IMessageRepository {
     user2: string
   ): Promise<{ messages: any[] } | undefined>;
 }
+
+export interface IThreadRepository {
+  createThread(data: {
+    author: string;
+    content: string;
+    image?: string;
+  }): Promise<any>;
+
+  getAllThreads(): Promise<any[]>;
+
+  updateThread(
+    threadId: string,
+    userId: string,
+    content: string
+  ): Promise<any | null>;
+
+  deleteThread(threadId: string, userId: string): Promise<any | null>;
+
+  toggleLike(threadId: string, userId: string): Promise<any | null>;
+}

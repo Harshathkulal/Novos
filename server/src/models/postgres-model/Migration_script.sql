@@ -43,3 +43,48 @@ CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
 CREATE INDEX idx_messages_sender_id ON messages(sender_id);
 CREATE INDEX idx_messages_receiver_id ON messages(receiver_id);
 CREATE INDEX idx_conversation_participants_user_id ON conversation_participants(user_id);
+
+
+-- Threads Table
+CREATE TABLE threads (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  content TEXT NOT NULL,
+  image TEXT,
+  author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Thread Likes (Many-to-Many between users & threads)
+CREATE TABLE thread_likes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  thread_id UUID NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (thread_id, user_id) -- prevent duplicate likes
+);
+
+-- Thread Comments
+CREATE TABLE thread_comments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  thread_id UUID NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Thread Shares (optional: for re-posts/shares)
+CREATE TABLE thread_shares (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  thread_id UUID NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (thread_id, user_id) -- prevent duplicate shares
+);
+
+-- Indexes for performance
+CREATE INDEX idx_threads_author ON threads(author_id);
+CREATE INDEX idx_thread_likes_thread ON thread_likes(thread_id);
+CREATE INDEX idx_thread_comments_thread ON thread_comments(thread_id);
+CREATE INDEX idx_thread_shares_thread ON thread_shares(thread_id);
+
