@@ -2,10 +2,12 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import userReducer from "@/redux/slices/userSlice";
 import chatReducer from "@/redux/slices/chatSlice";
+import threadReducer from "@/redux/slices/threadSlice";
 
 const rootReducer = combineReducers({
   user: userReducer,
   chat: chatReducer,
+  thread: threadReducer,
 });
 
 

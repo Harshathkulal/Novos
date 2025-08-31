@@ -1,6 +1,6 @@
 import React from "react";
 import { Heart, MessageCircle, Share } from "lucide-react";
-import { likePostApi } from "@/services/threadService";
+import { likeThread } from "@/services/threadService";
 import type { EngagementProps } from "@/types/thread.types";
 
 export const EngagementButtons: React.FC<EngagementProps> = ({
@@ -8,7 +8,7 @@ export const EngagementButtons: React.FC<EngagementProps> = ({
   updatePost,
 }) => {
   const handleLike = async () => {
-    const updated = await likePostApi(post.id);
+    const updated = await likeThread(post.id);
     updatePost(updated);
   };
 

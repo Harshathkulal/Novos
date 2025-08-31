@@ -1,11 +1,12 @@
 export interface Author {
+  id: string;
   name: string;
   username: string;
   avatar: string;
 }
 
 export interface Post {
-  id: number;
+  id: string;
   author: Author;
   content: string;
   image: string | null;
@@ -24,7 +25,7 @@ export interface EngagementProps {
 export interface PostCardProps {
   post: Post;
   updatePost: (post: Post) => void;
-  removePost: (id: number) => void;
+  removePost: (id: string) => void;
 }
 
 export interface PostFormProps {

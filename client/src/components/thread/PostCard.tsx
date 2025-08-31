@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,9 +10,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { EngagementButtons } from "./EngagementButtons";
-import { updatePostApi, deletePostApi } from "@/services/threadService";
+import { updateThread, deleteThread } from "@/services/threadService";
 import type { PostCardProps } from "@/types/thread.types";
-import {capitalizeLetter} from "@/utils/Utils"
+import { capitalizeLetter } from "@/utils/Utils";
+import type { RootState } from "@/redux/store";
 
 export const PostCard: React.FC<PostCardProps> = ({
   post,
@@ -21,14 +23,17 @@ export const PostCard: React.FC<PostCardProps> = ({
   const [editing, setEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
 
+  const currentUser = useSelector((state: RootState) => state.user.userInfo);
+  const isOwner = currentUser?.id === post.author.id;
+
   const handleSave = async () => {
-    const updated = await updatePostApi(post.id, { content: editContent });
+    const updated = await updateThread(post.id, { content: editContent });
     updatePost(updated);
     setEditing(false);
   };
 
   const handleDelete = async () => {
-    await deletePostApi(post.id);
+    await deleteThread(post.id);
     removePost(post.id);
   };
 
@@ -39,7 +44,9 @@ export const PostCard: React.FC<PostCardProps> = ({
         <div className="flex space-x-3 w-full">
           <Avatar>
             <AvatarImage src={post.author.avatar} alt={post.author.username} />
-            <AvatarFallback>{capitalizeLetter(post.author.username[0])}</AvatarFallback>
+            <AvatarFallback>
+              {capitalizeLetter(post.author.username[0])}
+            </AvatarFallback>
           </Avatar>
           <div className="w-full">
             <div className="flex items-center space-x-2 font-semibold">
@@ -60,30 +67,32 @@ export const PostCard: React.FC<PostCardProps> = ({
           </div>
         </div>
 
-        {/* Dropdown Menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => setEditing(true)}
-              className="flex items-center space-x-2"
-            >
-              <Edit size={14} />
-              <span>Edit</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={handleDelete}
-              className="flex items-center space-x-2 text-destructive"
-            >
-              <Trash2 size={14} />
-              <span>Delete</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Dropdown Menu (only for owner) */}
+        {isOwner && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setEditing(true)}
+                className="flex items-center space-x-2"
+              >
+                <Edit size={14} />
+                <span>Edit</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleDelete}
+                className="flex items-center space-x-2 text-destructive"
+              >
+                <Trash2 size={14} />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {/* Save/Cancel buttons for editing */}

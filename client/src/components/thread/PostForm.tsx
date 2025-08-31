@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { createPost } from "@/services/threadService";
+import { createThread } from "@/services/threadService";
 import type { PostFormProps } from "@/types/thread.types";
 
 export const PostForm: React.FC<PostFormProps> = ({ addPost }) => {
@@ -10,7 +10,7 @@ export const PostForm: React.FC<PostFormProps> = ({ addPost }) => {
   const handleSubmit = async () => {
     if (!content.trim()) return;
 
-    const post = await createPost({ content });
+    const post = await createThread({ content });
     addPost(post);
     setContent("");
   };

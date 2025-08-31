@@ -1,36 +1,42 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { PostForm } from "@/components/thread/PostForm";
-import { PostCard } from "@/components/thread//PostCard";
-import { getPosts } from "@/services/threadService";
+import { PostCard } from "@/components/thread/PostCard";
+import { getThreads } from "@/services/threadService";
 import type { Post } from "@/types/thread.types";
+import type { RootState, AppDispatch } from "@/redux/store";
+import {
+  setPosts,
+  addPost,
+  updatePost,
+  removePost,
+} from "@/redux/slices/threadSlice";
 
 export default function Thread() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const posts = useSelector((state: RootState) => state.thread.posts);
+
   useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    const data = await getPosts();
-    setPosts(data);
-  };
-
-  const addPost = (post: Post) => setPosts([post, ...posts]);
-  const updatePost = (updated: Post) =>
-    setPosts(posts.map((p) => (p.id === updated.id ? updated : p)));
-  const removePost = (id: number) => setPosts(posts.filter((p) => p.id !== id));
+    if (posts.length === 0) {
+      async function fetchAllPosts() {
+        const data = await getThreads();
+        dispatch(setPosts(data));
+      }
+      fetchAllPosts();
+    }
+  }, [dispatch, posts.length]);
 
   return (
     <div className="min-h-screen">
-      <PostForm addPost={addPost} />
+      <PostForm addPost={(post: Post) => dispatch(addPost(post))} />
       <div className="space-y-4 mt-4 mb-12">
         {posts.length > 0 ? (
           posts.map((post) => (
             <PostCard
               key={post.id}
               post={post}
-              updatePost={updatePost}
-              removePost={removePost}
+              updatePost={(p: Post) => dispatch(updatePost(p))}
+              removePost={(id: string) => dispatch(removePost(id))}
             />
           ))
         ) : (
