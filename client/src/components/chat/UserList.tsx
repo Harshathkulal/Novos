@@ -1,12 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { UserListProps } from "@/types/chat.types";
 import { Settings, ArrowLeft, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserListSkeleton from "./UserListSkeleton";
 
 export default function UserList({ users, userName }: UserListProps) {
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (users && users.length) {
+      setLoading(false);
+    }
+  }, [users]);
 
   const filteredUsers = users?.filter((user) =>
     user.username.toLowerCase().includes(search.toLowerCase())
@@ -42,7 +50,9 @@ export default function UserList({ users, userName }: UserListProps) {
 
       {/* User list */}
       <div className="flex-1 overflow-y-auto px-4 pb-4">
-        {filteredUsers?.length ? (
+        {loading ? (
+          <UserListSkeleton />
+        ) : filteredUsers?.length ? (
           filteredUsers.map((user) => (
             <button
               key={user.id}

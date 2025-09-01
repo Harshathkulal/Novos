@@ -1,7 +1,7 @@
 import MessageBubble from "@/components/chat/MessageBubble";
 import MessageSkeleton from "@/components/chat/MessageSkeleton";
 import type { MessageListProps } from "@/types/chat.types";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 export default function MessageList({
   messages,
@@ -10,8 +10,8 @@ export default function MessageList({
 }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  useLayoutEffect(() => {
+    messagesEndRef.current?.scrollIntoView();
   }, [messages]);
 
   return (

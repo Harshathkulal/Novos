@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { PostForm } from "@/components/thread/PostForm";
 import { PostCard } from "@/components/thread/PostCard";
@@ -11,16 +11,20 @@ import {
   updatePost,
   removePost,
 } from "@/redux/slices/threadSlice";
+import ThreadSkeleton from "./ThreadSkeleton";
 
 export default function Thread() {
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const posts = useSelector((state: RootState) => state.thread.posts);
 
   useEffect(() => {
     if (posts.length === 0) {
+      setLoading(true);
       async function fetchAllPosts() {
         const data = await getThreads();
         dispatch(setPosts(data));
+        setLoading(false);
       }
       fetchAllPosts();
     }
@@ -30,7 +34,9 @@ export default function Thread() {
     <div className="min-h-screen">
       <PostForm addPost={(post: Post) => dispatch(addPost(post))} />
       <div className="space-y-4 mt-4 mb-12">
-        {posts.length > 0 ? (
+        {loading ? (
+          <ThreadSkeleton />
+        ) : posts.length > 0 ? (
           posts.map((post) => (
             <PostCard
               key={post.id}
