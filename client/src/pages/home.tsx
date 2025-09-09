@@ -33,8 +33,8 @@ export default function Home() {
       <section className="mt-2 text-center max-w-2xl pb-20">
         <h2 className="text-xl font-semibold">About Novos</h2>
         <p className="mt-3 text-muted-foreground">
-          Novos is a simple side project exploring scalable UIs, APIs, and
-          system design.
+          Novos is a simple side project to explore scalable UIs, APIs, and
+          systems.
         </p>
 
         <div className="flex justify-center mt-6">

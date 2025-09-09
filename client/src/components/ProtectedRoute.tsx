@@ -1,18 +1,16 @@
-import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import type { ReactNode } from "react";
+import { useSelector } from "react-redux";
+import useAuth from "@/hooks/useAuth";
 import type { RootState } from "@/redux/store";
+import type { ReactNode } from "react";
+import Loading from "./loading";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
+export default function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { loading } = useAuth();
+  const user = useSelector((state: RootState) => state.user.userInfo);
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { userInfo } = useSelector((state: RootState) => state.user);
-
-  if (!userInfo) {
-    return <Navigate to="/login" replace />;
-  }
+  if (loading) return <Loading />;
+  if (!user) return <Navigate to="/login" replace />;
 
   return <>{children}</>;
 }
