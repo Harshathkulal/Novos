@@ -47,6 +47,7 @@ export class AuthService {
         id: user.id,
         username: user.username,
         email: user.email,
+        profileImg: user.profileImg,
       },
       tokens: {
         accessToken,
@@ -80,6 +81,9 @@ export class AuthService {
         username: user.username,
         email: user.email,
         profileImg: user.profileImg,
+      },
+       tokens: {
+        accessToken:token,
       },
     };
   }

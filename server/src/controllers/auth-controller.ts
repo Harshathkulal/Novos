@@ -34,7 +34,9 @@ export const logout = asyncHandler(async (_req: Request, res: Response) => {
 
 /**  Session Controller. **/
 export const session = asyncHandler(async (req: Request, res: Response) => {
-  const token = req.cookies.jwt;
+  const token =
+    req.cookies?.accessToken ||
+    req.header("Authorization")?.replace("Bearer ", "");
   const result = await authService.session(token);
 
   res
