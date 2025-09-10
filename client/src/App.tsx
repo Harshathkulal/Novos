@@ -9,6 +9,7 @@ import ChatPage from "@/components/chat/ChatPage";
 import ChatWithUserPage from "@/components/chat/ChatWithUserPage";
 import Thread from "@/components/thread/Thread";
 import BottomNav from "@/components/BottomNav";
+import NotFound from "./components/404";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function MainLayout() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="*" element={<NotFound />} />
 
         <Route
           path="/chat"
